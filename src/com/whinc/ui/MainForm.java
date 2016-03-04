@@ -1,5 +1,7 @@
 package com.whinc.ui;
 
+import com.whinc.Config;
+import com.whinc.controller.MainFormController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -12,7 +14,10 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import javax.annotation.Resource;
 import java.net.URL;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * Created by Administrator on 2016/3/2.
@@ -21,8 +26,13 @@ public class MainForm extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        URL url = getClass().getClassLoader().getResource("fxml/main_form.fxml");
-        Parent root = FXMLLoader.<Parent>load(url);
+        FXMLLoader fxmlLoader = new FXMLLoader(
+                Config.getResource("fxml/main_form.fxml"),
+                Config.getStringResource()
+        );
+        Parent root = fxmlLoader.load();
+        MainFormController controller = fxmlLoader.<MainFormController>getController();
+        controller.setStage(primaryStage);
 
         Rectangle2D rect = Screen.getPrimary().getVisualBounds();
         Scene scene = new Scene(root, rect.getWidth() / 2.0, rect.getHeight() / 2.0);

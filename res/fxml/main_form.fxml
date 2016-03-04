@@ -1,10 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.whinc.controller.MainFormController">
-    <Button text="Ok" onAction="#handlerButtonClick"/>
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.whinc.controller.MainFormController">
+   <children>
+       <MenuBar>
+           <Menu text="%menu_file">
+               <MenuItem onAction="#openFile" text="%menu_open" />
+               <Menu text="%menu_lang">
+                   <MenuItem id="lang_en" onAction="#switchLanguage" text="%menu_en" />
+                   <!--<MenuItem id="lang_zh" text="%menu_zh" onAction="#switchLanguage"/>-->
+               </Menu>
+               <SeparatorMenuItem />
+               <MenuItem text="%menu_exit" />
+           </Menu>
+           <Menu text="%menu_capture">
+               <MenuItem fx:id="menuItemStart" onAction="#startCapture" text="%menu_start" />
+               <MenuItem fx:id="menuItemStop" disable="true" onAction="#stopCapture" text="%menu_stop" />
+               <MenuItem onAction="#showCaptureOptions" text="%menu_options" />
+           </Menu>
+           <Menu text="%menu_about" />
+       </MenuBar>
+      <Button mnemonicParsing="false" onAction="#startCapture" text="Start" />
+      <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+        <tabs>
+          <Tab closable="false" text="%label_packet_parse">
+               <content>
+                  <VBox prefHeight="221.0" prefWidth="600.0">
+                     <children>
+                        <TableView fx:id="tableView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                          <columns>
+                            <TableColumn prefWidth="75.0" text="C1" />
+                            <TableColumn prefWidth="75.0" text="C2" />
+                          </columns>
+                        </TableView>
+                     </children>
+                  </VBox>
+               </content>
+          </Tab>
+          <Tab text="Untitled Tab 2">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+      <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="200.0">
+         <children>
+            <Label fx:id="statusInfoLabel" text="%label_status_info">
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Label>
+         </children>
+      </HBox>
+   </children>
 </VBox>
