@@ -1,6 +1,7 @@
 package com.whinc.controller;
 
 import com.whinc.Config;
+import com.whinc.model.NetworkAdapter;
 import com.whinc.pcap.PcapIfWrapper;
 import com.whinc.pcap.PcapManager;
 import com.whinc.ui.OptionDialog;
@@ -82,7 +83,7 @@ public class MainFormController {
 
     @FXML protected void startCapture(ActionEvent event) {
         MenuItem source = (MenuItem) event.getSource();
-        PcapIf pcapIf = PcapManager.getInstance().getCurrentPcapIf();
+        PcapIf pcapIf = PcapManager.getInstance().getNetworkAdapter().getPcapIf();
         if (pcapIf == null) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText(Config.getString("label_message"));
@@ -110,8 +111,16 @@ public class MainFormController {
     @FXML protected void showCaptureOptions(ActionEvent event) {
 
         List<PcapIf> interfaces = PcapManager.getInstance().getDeviceList();
-        OptionDialog<PcapIf> optionDialog = new OptionDialog<>(interfaces);
-        optionDialog.showAndWait();
+        OptionDialog optionDialog = new OptionDialog(interfaces);
+        Optional<NetworkAdapter> optional = optionDialog.showAndWait();
+        if (optional.isPresent()) {
+            NetworkAdapter networkAdapter = optional.get();
+            PcapManager.getInstance().setNetworkAdapter(networkAdapter);
+
+            setStatusInfo(String.format(Config.getString("label_select_xx"), networkAdapter));
+        } else {
+            setStatusWarning(Config.getString("label_select_nothing"));
+        }
 
 //        ChoiceDialog<PcapIfWrapper> choiceDialog = new ChoiceDialog<>();
 //

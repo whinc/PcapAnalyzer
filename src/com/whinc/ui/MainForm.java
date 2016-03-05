@@ -37,7 +37,7 @@ public class MainForm extends Application {
         Rectangle2D rect = Screen.getPrimary().getVisualBounds();
         Scene scene = new Scene(root, rect.getWidth() / 2.0, rect.getHeight() / 2.0);
         primaryStage.setScene(scene);
-
+        primaryStage.setTitle(Config.getString("title_main_form"));
         primaryStage.show();
     }
 }

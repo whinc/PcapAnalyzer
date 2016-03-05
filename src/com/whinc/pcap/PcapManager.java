@@ -1,5 +1,6 @@
 package com.whinc.pcap;
 
+import com.whinc.model.NetworkAdapter;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
@@ -22,15 +23,15 @@ import java.util.List;
 public class PcapManager {
     private static final PcapManager pcapManager = new PcapManager();
 
-    public PcapIf getCurrentPcapIf() {
-        return currentPcapIf;
+    public NetworkAdapter getNetworkAdapter() {
+        return networkAdapter;
     }
 
-    public void setCurrentPcapIf(PcapIf currentPcapIf) {
-        this.currentPcapIf = currentPcapIf;
+    public void setNetworkAdapter(NetworkAdapter networkAdapter) {
+        this.networkAdapter = networkAdapter;
     }
 
-    private PcapIf currentPcapIf;
+    private NetworkAdapter networkAdapter;
 
     private PcapManager() {}
 
