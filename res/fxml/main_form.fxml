@@ -34,7 +34,6 @@
            </Menu>
            <Menu text="%menu_about" />
        </MenuBar>
-      <Button mnemonicParsing="false" onAction="#startCapture" text="Start" />
       <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
         <tabs>
           <Tab closable="false" text="%label_packet_parse">

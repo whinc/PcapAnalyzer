@@ -47,15 +47,21 @@ public class OptionDialog extends Dialog<NetworkAdapter>{
 
         initTableView();
 
-        dialogPane.getButtonTypes().addAll(ButtonType.CLOSE);
+        ButtonType start = new ButtonType("Start", ButtonBar.ButtonData.OK_DONE);
+        dialogPane.getButtonTypes().addAll(start, ButtonType.CLOSE);
 
         setResultConverter(param -> {
             for (NetworkAdapter e : networkAdapters) {
                 if (e.isChecked()) {
-                    return e;
+                    PcapManager.getInstance().setNetworkAdapter(e);
+                    break;
                 }
             }
-            return null;
+            if( param.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+                return PcapManager.getInstance().getNetworkAdapter();
+            } else {
+                return null;
+            }
         });
     }
 

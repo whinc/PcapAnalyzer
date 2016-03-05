@@ -6,6 +6,7 @@ import com.whinc.pcap.PcapIfWrapper;
 import com.whinc.pcap.PcapManager;
 import com.whinc.ui.OptionDialog;
 import javafx.event.ActionEvent;
+import javafx.event.EventTarget;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -13,6 +14,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 
 import java.io.File;
@@ -43,12 +45,6 @@ public class MainFormController {
         dialog.showAndWait();
     }
 
-    @FXML
-    protected void startCapture() {
-        System.out.println("start capture");
-
-        PcapManager.capture();
-    }
 
     /**
      * Open file and load offline *.pcap data
@@ -83,8 +79,8 @@ public class MainFormController {
 
     @FXML protected void startCapture(ActionEvent event) {
         MenuItem source = (MenuItem) event.getSource();
-        PcapIf pcapIf = PcapManager.getInstance().getNetworkAdapter().getPcapIf();
-        if (pcapIf == null) {
+        NetworkAdapter networkAdapter = PcapManager.getInstance().getNetworkAdapter();
+        if (networkAdapter == null) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText(Config.getString("label_message"));
             String text = Config.getString("label_info_select_net_if");
@@ -98,6 +94,8 @@ public class MainFormController {
         setStatusInfo(Config.getString("label_start_capture"));
         source.setDisable(true);
         menuItemStop.setDisable(false);
+
+        PcapIf pcapIf = networkAdapter.getPcapIf();
     }
 
     @FXML protected void stopCapture(ActionEvent event) {
@@ -113,44 +111,16 @@ public class MainFormController {
         List<PcapIf> interfaces = PcapManager.getInstance().getDeviceList();
         OptionDialog optionDialog = new OptionDialog(interfaces);
         Optional<NetworkAdapter> optional = optionDialog.showAndWait();
-        if (optional.isPresent()) {
-            NetworkAdapter networkAdapter = optional.get();
-            PcapManager.getInstance().setNetworkAdapter(networkAdapter);
-
-            setStatusInfo(String.format(Config.getString("label_select_xx"), networkAdapter));
+        if (optional.isPresent()) {     // If result is not null, start capture immediately
+            startCapture(new ActionEvent(menuItemStart, null));
         } else {
-            setStatusWarning(Config.getString("label_select_nothing"));
+            NetworkAdapter networkAdapter = PcapManager.getInstance().getNetworkAdapter();
+            if (networkAdapter != null) {
+                setStatusInfo(String.format(Config.getString("label_select_xx"), networkAdapter));
+            } else {
+                setStatusWarning(Config.getString("label_select_nothing"));
+            }
         }
-
-//        ChoiceDialog<PcapIfWrapper> choiceDialog = new ChoiceDialog<>();
-//
-//        // setup dialog
-//        choiceDialog.setTitle(Config.getString("label_choose_network_interface"));
-//        choiceDialog.setHeaderText(Config.getString("label_choose_network_interface_description"));
-//        ImageView graphic = new ImageView(new Image(Config.getResource("images/ic_network.png").toString()));
-//        graphic.setFitWidth(60.0);
-//        graphic.setFitHeight(60.0);
-//        graphic.setSmooth(true);
-//        choiceDialog.setGraphic(graphic);
-//
-//        // set data
-//        List<PcapIf> deviceList = PcapManager.getInstance().getDeviceList();
-//        List<PcapIfWrapper> pcapIfs = new ArrayList<>(deviceList.size());
-//        for (int i = 0; i < deviceList.size(); ++i) {
-//            pcapIfs.add(new PcapIfWrapper(i+1, deviceList.get(i)));
-//        }
-//        choiceDialog.getItems().addAll(pcapIfs);
-//
-//        // get result
-//        Optional<PcapIfWrapper> optional = choiceDialog.showAndWait();
-//        if (optional.isPresent()) {
-//            PcapIf pcapIf = optional.get().getPcapIf();
-//            PcapManager.getInstance().setCurrentPcapIf(pcapIf);
-//
-//            setStatusInfo(String.format(Config.getString("label_select_xx"), optional.get()));
-//        } else {
-//            setStatusWarning(Config.getString("label_select_nothing"));
-//        }
     }
 
     private void setStatusError(String text) {
