@@ -43,6 +43,9 @@ public class PacketUtils {
         if (packet.hasHeader(IEEE802dot3.ID)) {
             name = name(IEEE802dot3.class);
         }
+        if (packet.hasHeader(SLL.ID)) {
+            name = name(SLL.class);
+        }
 
         /* 网络层协议 */
         if (packet.hasHeader(Ip4.ID)) {
@@ -72,9 +75,6 @@ public class PacketUtils {
         }
         if (packet.hasHeader(Rtp.ID)) {
             name = name(Rtp.class);
-        }
-        if (packet.hasHeader(SLL.ID)) {
-            name = name(SLL.class);
         }
 
         /* 应用层协议 */

@@ -90,7 +90,7 @@ public class MainFormController {
             int selectedIndex = tableView.getSelectionModel().getSelectedIndex();
             ObservableList<PacketInfo> items = tableView.getItems();
             packetDetailText.setText(items.get(selectedIndex).getPacket().toString());
-            System.out.println("select row:" + selectedIndex);
+//            System.out.println("select row:" + selectedIndex);
         });
 
         System.out.println("End initialize");
