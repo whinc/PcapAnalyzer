@@ -13,9 +13,18 @@ public class Config {
     public static final String CONFIG_FILE = "config.xml";
 //    public static Locale DEFAULT_LOCALE = Locale.CHINESE;
     public static Locale DEFAULT_LOCALE = Locale.ENGLISH;
+    public static final long DEFAULT_TIMESTAMP = 0L;
+    private static long timestamp = DEFAULT_TIMESTAMP;      // microsecond
 
     private Config(){}
 
+    public static void setTimestamp(long v) {
+        timestamp = v;
+    }
+
+    public static long getTimestamp() {
+        return timestamp;
+    }
 
     public static FXMLLoader createFXMLLoader(String fxml) {
         return new FXMLLoader(getResource(fxml), getStringResource());

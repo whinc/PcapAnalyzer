@@ -1,5 +1,6 @@
 package com.whinc.pcap;
 
+import com.whinc.Config;
 import com.whinc.model.NetworkAdapter;
 import com.whinc.model.PacketInfo;
 import javafx.beans.value.ChangeListener;
@@ -31,7 +32,6 @@ public class PcapManager {
     private static final PcapManager pcapManager = new PcapManager();
     private Task<Void> task;
     private Pcap pcap;
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public NetworkAdapter getNetworkAdapter() {
         return networkAdapter;
@@ -68,6 +68,7 @@ public class PcapManager {
             System.err.println("Network adapter is null");
             return false;
         }
+        stopCapture();
 
         PcapIf pcapIf = networkAdapter.getPcapIf();
         StringBuilder errBuf = new StringBuilder();
@@ -90,6 +91,9 @@ public class PcapManager {
 
                     @Override
                     public void nextPacket(PcapPacket pcapPacket, Void aVoid) {
+                        if (Config.getTimestamp() <= Config.DEFAULT_TIMESTAMP) {
+                            Config.setTimestamp(pcapPacket.getCaptureHeader().timestampInMicros());
+                        }
                         packetInfos.add(new PacketInfo(pcapPacket));
                         // 通知更新
                         updateProgress(packetInfos.size(), Long.MAX_VALUE);
@@ -104,7 +108,9 @@ public class PcapManager {
         if (changeListener != null) {
             task.progressProperty().addListener(changeListener);
         }
-        executorService.submit(task);
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
         return true;
     }
 
@@ -116,7 +122,11 @@ public class PcapManager {
             task.cancel();
         }
         if (pcap != null) {
-            pcap.close();
+            try {
+                pcap.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -130,6 +140,7 @@ public class PcapManager {
             System.err.println("Can not open file:" + filename);
             return;
         }
+        stopCapture();
 
         StringBuilder errBuf = new StringBuilder();
         Pcap pcap = Pcap.openOffline(filename, errBuf);
@@ -140,6 +151,9 @@ public class PcapManager {
 
         PcapPacket packet = new PcapPacket(JMemory.Type.POINTER);
         while (pcap.nextEx(packet) == Pcap.NEXT_EX_OK) {
+            if (Config.getTimestamp() <= Config.DEFAULT_TIMESTAMP) {
+                Config.setTimestamp(packet.getCaptureHeader().timestampInMicros());
+            }
             PacketInfo packetInfo = new PacketInfo(packet);
             packetInfos.add(packetInfo);
         }

@@ -1,5 +1,6 @@
 package com.whinc.model;
 
+import com.whinc.Config;
 import com.whinc.util.PacketUtils;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.protocol.network.Ip4;
@@ -20,10 +21,7 @@ public class PacketInfo {
     }
 
     public long getTimestamp() {
-        if (firstTimestamp == 0) {
-            firstTimestamp = packet.getCaptureHeader().timestampInMicros();
-        }
-        return packet.getCaptureHeader().timestampInMicros() - firstTimestamp;
+        return packet.getCaptureHeader().timestampInMicros() - Config.getTimestamp();
     }
 
     public String getSourcee() {

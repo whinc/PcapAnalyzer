@@ -5,19 +5,10 @@ import com.whinc.controller.MainFormController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Menu;
-import javafx.scene.layout.HBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-
-import javax.annotation.Resource;
-import java.net.URL;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 /**
  * Created by Administrator on 2016/3/2.
@@ -39,5 +30,10 @@ public class MainForm extends Application {
         primaryStage.setScene(scene);
         primaryStage.setTitle(Config.getString("title_main_form"));
         primaryStage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        super.stop();
     }
 }

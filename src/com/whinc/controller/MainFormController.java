@@ -106,8 +106,10 @@ public class MainFormController {
             return;
         }
 
-        // 解析数据
-        PcapManager.getInstance().startCapture(file.getAbsolutePath(), tableView.getItems());
+        ObservableList data = tableView.getItems();
+        data.clear();
+        Config.setTimestamp(Config.DEFAULT_TIMESTAMP);
+        PcapManager.getInstance().startCapture(file.getAbsolutePath(), data);
     }
 
     @FXML
