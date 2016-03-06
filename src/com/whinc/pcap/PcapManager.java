@@ -2,7 +2,10 @@ package com.whinc.pcap;
 
 import com.whinc.model.NetworkAdapter;
 import com.whinc.model.PacketInfo;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.event.Event;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
@@ -18,12 +21,17 @@ import org.jnetpcap.protocol.tcpip.Udp;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Administrator on 2016/3/4.
  */
 public class PcapManager {
     private static final PcapManager pcapManager = new PcapManager();
+    private Task<Void> task;
+    private Pcap pcap;
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public NetworkAdapter getNetworkAdapter() {
         return networkAdapter;
@@ -55,39 +63,61 @@ public class PcapManager {
      * 实时捕获网络适配器数据包
      * @param packetInfos
      */
-    public void startCapture(ObservableList<PacketInfo> packetInfos) {
+    public boolean startCapture(ObservableList<PacketInfo> packetInfos, ChangeListener changeListener) {
         if (networkAdapter == null || networkAdapter.getPcapIf() == null) {
             System.err.println("Network adapter is null");
-            return;
+            return false;
         }
 
         PcapIf pcapIf = networkAdapter.getPcapIf();
         StringBuilder errBuf = new StringBuilder();
-        Pcap pcap = Pcap.openLive(pcapIf.getName(),
+        pcap = Pcap.openLive(pcapIf.getName(),
                 Pcap.DEFAULT_SNAPLEN,
                 Pcap.DEFAULT_PROMISC,
                 Pcap.DEFAULT_TIMEOUT,
                 errBuf);
         if (pcap == null) {
             System.err.println("Error while open device interface:" + errBuf);
-            return;
+            return false;
         }
 
-//        PcapPacket packet = new PcapPacket(JMemory.Type.POINTER);
-//        while (pcap.nextEx(packet) == Pcap.NEXT_EX_OK) {
-//
-//            PacketInfo packetInfo = new PacketInfo(packet);
-//            packetInfos.add(packetInfo);
-//
-//        }
+        task = new Task<Void>() {
 
-        pcap.loop(10, new PcapPacketHandler<Object>() {
             @Override
-            public void nextPacket(PcapPacket pcapPacket, Object o) {
-                packetInfos.add(new PacketInfo(pcapPacket));
+            protected Void call() throws Exception {
+
+                PcapPacketHandler<Void> handler = new PcapPacketHandler<Void>() {
+
+                    @Override
+                    public void nextPacket(PcapPacket pcapPacket, Void aVoid) {
+                        packetInfos.add(new PacketInfo(pcapPacket));
+                        // 通知更新
+                        updateProgress(packetInfos.size(), Long.MAX_VALUE);
+                    }
+                };
+                pcap.loop(-1, handler, null);
+
+                return null;
             }
-        }, null);
-        pcap.close();
+
+        };
+        if (changeListener != null) {
+            task.progressProperty().addListener(changeListener);
+        }
+        executorService.submit(task);
+        return true;
+    }
+
+    /**
+     * 停止实时捕获
+     */
+    public void stopCapture() {
+        if (task != null && task.isRunning()) {
+            task.cancel();
+        }
+        if (pcap != null) {
+            pcap.close();
+        }
     }
 
     /**

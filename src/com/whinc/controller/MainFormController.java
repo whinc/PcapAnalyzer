@@ -6,6 +6,9 @@ import com.whinc.model.PacketInfo;
 import com.whinc.pcap.PcapManager;
 import com.whinc.ui.OptionDialog;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -82,7 +85,6 @@ public class MainFormController {
         infoCol.setCellValueFactory(param -> {
             return new SimpleStringProperty(param.getValue().getInfo());
         });
-
         System.out.println("End initialize");
     }
 
@@ -139,7 +141,17 @@ public class MainFormController {
         source.setDisable(true);
         menuItemStop.setDisable(false);
 
-        PcapManager.getInstance().startCapture(tableView.getItems());
+        // 开始捕获数据包
+        boolean result = PcapManager.getInstance().startCapture(tableView.getItems(), new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                tableView.scrollTo(tableView.getItems().size());
+            }
+        });
+
+        if (result) {
+            setStatusInfo(Config.getString("label_pcap_running"));
+        }
     }
 
     @FXML protected void stopCapture(ActionEvent event) {
@@ -148,6 +160,10 @@ public class MainFormController {
         setStatusInfo(Config.getString("label_stop_capture"));
         source.setDisable(true);
         menuItemStart.setDisable(false);
+
+        PcapManager.getInstance().stopCapture();
+
+        setStatusInfo(Config.getString("label_pcap_ready"));
     }
 
     @FXML protected void showCaptureOptions(ActionEvent event) {

@@ -10,6 +10,7 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -50,6 +51,7 @@
                               <TableColumn prefWidth="221.0" sortable="false" text="%label_pkg_info" />
                           </columns>
                         </TableView>
+                        <TextArea fx:id="packetDetailText" prefHeight="200.0" prefWidth="200.0" />
                      </children>
                   </VBox>
                </content>
