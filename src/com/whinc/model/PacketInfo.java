@@ -9,7 +9,11 @@ import org.jnetpcap.protocol.network.Ip4;
  * Created by Administrator on 2016/3/5.
  */
 public class PacketInfo {
-    private static long firstTimestamp = 0;
+
+    public PcapPacket getPacket() {
+        return packet;
+    }
+
     private PcapPacket packet;
 
     public PacketInfo(PcapPacket packet) {

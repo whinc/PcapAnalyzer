@@ -14,8 +14,9 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="561.0" prefWidth="808.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.whinc.controller.MainFormController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="616.0" prefWidth="808.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.whinc.controller.MainFormController">
    <children>
        <MenuBar>
            <Menu text="%menu_file">
@@ -51,7 +52,10 @@
                               <TableColumn prefWidth="221.0" sortable="false" text="%label_pkg_info" />
                           </columns>
                         </TableView>
-                        <TextArea fx:id="packetDetailText" prefHeight="200.0" prefWidth="200.0" />
+                        <TextArea fx:id="packetDetailText" editable="false" prefHeight="200.0" prefWidth="200.0" promptText="Network Packet Data" wrapText="false">
+                           <font>
+                              <Font name="Consolas" size="14.0" />
+                           </font></TextArea>
                      </children>
                   </VBox>
                </content>

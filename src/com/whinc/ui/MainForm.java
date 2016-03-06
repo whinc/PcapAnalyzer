@@ -22,11 +22,12 @@ public class MainForm extends Application {
                 Config.getStringResource()
         );
         Parent root = fxmlLoader.load();
+        root.getStylesheets().addAll("css/main_form.css");
         MainFormController controller = fxmlLoader.<MainFormController>getController();
         controller.setStage(primaryStage);
 
         Rectangle2D rect = Screen.getPrimary().getVisualBounds();
-        Scene scene = new Scene(root, rect.getWidth() / 2.0, rect.getHeight() / 2.0);
+        Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.setTitle(Config.getString("title_main_form"));
         primaryStage.show();

@@ -1,0 +1,5 @@
+/* Set the font for the cells */
+.table-row-cell {
+    -fx-font-size: 14px;
+    -fx-font-family: Consolas;
+}

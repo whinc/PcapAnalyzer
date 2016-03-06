@@ -8,7 +8,6 @@ import com.whinc.ui.OptionDialog;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -27,6 +26,7 @@ import java.util.Optional;
  */
 public class MainFormController {
     @FXML  public Label statusInfoLabel;
+    public TextArea packetDetailText;
     private Stage stage;
     @FXML public MenuItem menuItemStop;
     @FXML private TableView tableView;
@@ -85,6 +85,14 @@ public class MainFormController {
         infoCol.setCellValueFactory(param -> {
             return new SimpleStringProperty(param.getValue().getInfo());
         });
+
+        tableView.setOnMouseClicked(event -> {
+            int selectedIndex = tableView.getSelectionModel().getSelectedIndex();
+            ObservableList<PacketInfo> items = tableView.getItems();
+            packetDetailText.setText(items.get(selectedIndex).getPacket().toString());
+            System.out.println("select row:" + selectedIndex);
+        });
+
         System.out.println("End initialize");
     }
 
@@ -129,13 +137,7 @@ public class MainFormController {
         MenuItem source = (MenuItem) event.getSource();
         NetworkAdapter networkAdapter = PcapManager.getInstance().getNetworkAdapter();
         if (networkAdapter == null) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setHeaderText(Config.getString("label_message"));
-            String text = Config.getString("label_info_select_net_if");
-            alert.setHeaderText(text);
-            alert.showAndWait();
-
-            setStatusWarning(text);
+            showCaptureOptions(null);
             return;
         }
 
