@@ -39,6 +39,7 @@ public class OptionDialog extends Dialog<NetworkAdapter>{
     private void init() throws IOException {
         FXMLLoader fxmlLoader = Config.createFXMLLoader("fxml/option_dialog.fxml");
         Parent contentRoot = fxmlLoader.<Parent>load();
+        contentRoot.getStylesheets().addAll("css/option_dialog.css");
 
         DialogPane dialogPane = getDialogPane();
         dialogPane.setContent(contentRoot);
