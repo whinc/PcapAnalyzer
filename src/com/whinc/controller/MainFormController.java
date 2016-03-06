@@ -2,23 +2,22 @@ package com.whinc.controller;
 
 import com.whinc.Config;
 import com.whinc.model.NetworkAdapter;
-import com.whinc.pcap.PcapIfWrapper;
+import com.whinc.model.PacketInfo;
 import com.whinc.pcap.PcapManager;
 import com.whinc.ui.OptionDialog;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventTarget;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 
 import java.io.File;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by Administrator on 2016/3/2.
@@ -47,6 +46,47 @@ public class MainFormController {
 
 
     /**
+     * 初始化 （该方法在FXMLLoader加载布局文件时自动调用）
+     */
+    @FXML protected void initialize() {
+        System.out.println("Begin initialize");
+
+        ObservableList<TableColumn<PacketInfo, String>> columns = tableView.getColumns();
+        TableColumn<PacketInfo, String> numCol = columns.get(0);
+        numCol.setCellValueFactory(param -> {
+            PacketInfo packetInfo = param.getValue();
+            return new SimpleStringProperty(String.valueOf(packetInfo.getNumber()));
+        });
+        TableColumn<PacketInfo, String> timeCol = columns.get(1);
+        timeCol.setCellValueFactory(param -> {
+            PacketInfo packetInfo = param.getValue();
+            return new SimpleStringProperty(String.format("%.6f", packetInfo.getTimestamp() / 1e6));
+        });
+        TableColumn<PacketInfo, String> srcCol = columns.get(2);
+        srcCol.setCellValueFactory(param -> {
+            return new SimpleStringProperty(param.getValue().getSourcee());
+        });
+        TableColumn<PacketInfo, String> dstCol = columns.get(3);
+        dstCol.setCellValueFactory(param -> {
+            return new SimpleStringProperty(param.getValue().getDestination());
+        });
+        TableColumn<PacketInfo, String> protocolCol = columns.get(4);
+        protocolCol.setCellValueFactory(param -> {
+            return new SimpleStringProperty(param.getValue().getProtocolName());
+        });
+        TableColumn<PacketInfo, String> lengthCol = columns.get(5);
+        lengthCol.setCellValueFactory(param -> {
+            return new SimpleStringProperty(String.valueOf(param.getValue().getLength()));
+        });
+        TableColumn<PacketInfo, String> infoCol = columns.get(6);
+        infoCol.setCellValueFactory(param -> {
+            return new SimpleStringProperty(param.getValue().getInfo());
+        });
+
+        System.out.println("End initialize");
+    }
+
+    /**
      * Open file and load offline *.pcap data
      * @param event
      */
@@ -59,9 +99,13 @@ public class MainFormController {
                 new FileChooser.ExtensionFilter("libpcap", "*.pcap")
         );
         File file = fileChooser.showOpenDialog(stage);
-        if (file != null && file.exists()) {
-            System.out.println(file);
+        if (file == null || !file.exists()) {
+            System.err.println("Can't find file:" + file);
+            return;
         }
+
+        // 解析数据
+        PcapManager.getInstance().startCapture(file.getAbsolutePath(), tableView.getItems());
     }
 
     @FXML
@@ -95,7 +139,7 @@ public class MainFormController {
         source.setDisable(true);
         menuItemStop.setDisable(false);
 
-        PcapIf pcapIf = networkAdapter.getPcapIf();
+        PcapManager.getInstance().startCapture(tableView.getItems());
     }
 
     @FXML protected void stopCapture(ActionEvent event) {

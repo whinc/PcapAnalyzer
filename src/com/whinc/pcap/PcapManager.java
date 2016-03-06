@@ -1,10 +1,11 @@
 package com.whinc.pcap;
 
 import com.whinc.model.NetworkAdapter;
+import com.whinc.model.PacketInfo;
+import javafx.collections.ObservableList;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
-import org.jnetpcap.PcapInteger;
 import org.jnetpcap.nio.JMemory;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
@@ -14,6 +15,7 @@ import org.jnetpcap.protocol.tcpip.Http;
 import org.jnetpcap.protocol.tcpip.Tcp;
 import org.jnetpcap.protocol.tcpip.Udp;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +51,72 @@ public class PcapManager {
         return pcapIfs;
     }
 
-    public static void capture() {
+    /**
+     * 实时捕获网络适配器数据包
+     * @param packetInfos
+     */
+    public void startCapture(ObservableList<PacketInfo> packetInfos) {
+        if (networkAdapter == null || networkAdapter.getPcapIf() == null) {
+            System.err.println("Network adapter is null");
+            return;
+        }
+
+        PcapIf pcapIf = networkAdapter.getPcapIf();
+        StringBuilder errBuf = new StringBuilder();
+        Pcap pcap = Pcap.openLive(pcapIf.getName(),
+                Pcap.DEFAULT_SNAPLEN,
+                Pcap.DEFAULT_PROMISC,
+                Pcap.DEFAULT_TIMEOUT,
+                errBuf);
+        if (pcap == null) {
+            System.err.println("Error while open device interface:" + errBuf);
+            return;
+        }
+
+//        PcapPacket packet = new PcapPacket(JMemory.Type.POINTER);
+//        while (pcap.nextEx(packet) == Pcap.NEXT_EX_OK) {
+//
+//            PacketInfo packetInfo = new PacketInfo(packet);
+//            packetInfos.add(packetInfo);
+//
+//        }
+
+        pcap.loop(10, new PcapPacketHandler<Object>() {
+            @Override
+            public void nextPacket(PcapPacket pcapPacket, Object o) {
+                packetInfos.add(new PacketInfo(pcapPacket));
+            }
+        }, null);
+        pcap.close();
+    }
+
+    /**
+     * 解析离线数据包
+     * @param filename
+     * @param packetInfos
+     */
+    public void startCapture(String filename, ObservableList<PacketInfo> packetInfos) {
+        if (filename == null || filename.isEmpty() || !new File(filename).exists()) {
+            System.err.println("Can not open file:" + filename);
+            return;
+        }
+
+        StringBuilder errBuf = new StringBuilder();
+        Pcap pcap = Pcap.openOffline(filename, errBuf);
+        if (pcap == null) {
+            System.err.println("Error while open device interface:" + errBuf);
+            return;
+        }
+
+        PcapPacket packet = new PcapPacket(JMemory.Type.POINTER);
+        while (pcap.nextEx(packet) == Pcap.NEXT_EX_OK) {
+            PacketInfo packetInfo = new PacketInfo(packet);
+            packetInfos.add(packetInfo);
+        }
+        pcap.close();
+    }
+
+    public void capture() {
 
         ArrayList<PcapIf> pcapIfs = new ArrayList<>();
         StringBuilder errBuf = new StringBuilder();
