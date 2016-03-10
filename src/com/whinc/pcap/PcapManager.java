@@ -131,118 +131,53 @@ public class PcapManager {
     }
 
     /**
-     * 解析离线数据包
-     * @param filename
-     * @param packetInfos
+     * 捕获离线网络数据包
+     * @param file
+     * @param listener
      */
-    public void startCapture(String filename, ObservableList<PacketInfo> packetInfos) {
-        if (filename == null || filename.isEmpty() || !new File(filename).exists()) {
-            System.err.println("Can not open file:" + filename);
+    public void captureOffline(File file, OnCapturePacketListener listener) {
+        if (file == null || !file.exists() || !file.isFile()) {
+            System.err.println("Can not open file:" + file);
             return;
         }
+
         stopCapture();
 
         StringBuilder errBuf = new StringBuilder();
-        Pcap pcap = Pcap.openOffline(filename, errBuf);
+        Pcap pcap = Pcap.openOffline(file.getAbsolutePath(), errBuf);
         if (pcap == null) {
             System.err.println("Error while open device interface:" + errBuf);
             return;
         }
 
-        PcapPacket packet = new PcapPacket(JMemory.Type.POINTER);
-        while (pcap.nextEx(packet) == Pcap.NEXT_EX_OK) {
-            if (Config.getTimestamp() <= Config.DEFAULT_TIMESTAMP) {
-                Config.setTimestamp(packet.getCaptureHeader().timestampInMicros());
-            }
-            PacketInfo packetInfo = new PacketInfo(packet);
-            packetInfos.add(packetInfo);
-        }
-        pcap.close();
-    }
-
-    public void capture() {
-
-        ArrayList<PcapIf> pcapIfs = new ArrayList<>();
-        StringBuilder errBuf = new StringBuilder();
-        int code = Pcap.findAllDevs(pcapIfs, errBuf);
-        if (code != Pcap.OK || pcapIfs.isEmpty()) {
-            System.err.println("There is no network interface:" + errBuf);
-            return;
-        }
-        for (int i = 0; i < pcapIfs.size(); ++i) {
-            PcapIf pcapIf = pcapIfs.get(i);
-            System.out.println(String.format("%d %s %s", i, pcapIf.getName(), pcapIf.getDescription()));
-        }
-        System.out.println("Enter interface index which will be sniffed:");
-        int index = 3;
-//        int index = 0;
-//        try {
-//            index = new Scanner(System.in).nextInt();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-        PcapIf pcapIf = pcapIfs.get(index);
-        Pcap pcap = Pcap.openLive(pcapIf.getName(),
-                Pcap.DEFAULT_SNAPLEN,
-                Pcap.DEFAULT_PROMISC,
-                Pcap.DEFAULT_TIMEOUT,
-                errBuf);
-        if (pcap == null) {
-            System.err.println("Error while open device interface:" + errBuf);
-            return;
-        }
-
-        PcapBpfProgram program = new PcapBpfProgram();
-        String filterExp = "tcp port 80";
-        int optimise = 1;   // 1 表示优化，其他值表示不优化
-        int netmask = 0xFFFFFF00;
-        if (pcap.compile(program, filterExp, optimise, netmask) != Pcap.OK) {
-            System.out.println("compile filter expression failed:" + pcap.getErr());
-            return;
-        }
-        if (pcap.setFilter(program) != Pcap.OK) {
-            System.out.println("setup filter program failed:" + pcap.getErr());
-            return;
-        }
-
-        PcapPacketHandler packetHandler = new PcapPacketHandler() {
-
+        task = new Task<Void>() {
             @Override
-            public void nextPacket(PcapPacket pcapPacket, Object o) {
-                Ethernet ethernet = new Ethernet();
-                Ip4 ip4 = new Ip4();
-                Tcp tcp = new Tcp();
-                Udp udp = new Udp();
-                Http http = new Http();
-//                if (pcapPacket.hasHeader(ethernet)) {
-//                    System.out.println(ethernet.toString());
-//                }
-//                if (pcapPacket.hasHeader(ip4)) {
-//                    System.out.println(ip4);
-//                }
-//                if (pcapPacket.hasHeader(tcp)) {
-//                    System.out.println(tcp);
-//                }
-//                if (pcapPacket.hasHeader(udp)) {
-//                    System.out.println(udp);
-//                }
-                if (pcapPacket.hasHeader(http)) {
-                    System.out.println(http);
+            protected Void call() throws Exception {
+
+                PcapPacket packet = new PcapPacket(JMemory.Type.POINTER);
+                while (pcap.nextEx(packet) == Pcap.NEXT_EX_OK) {
+                    if (listener != null) {
+                        listener.onCapture(packet);
+                    }
                 }
+                pcap.close();
+                return null;
             }
         };
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+    }
 
-        pcap.loop(10, packetHandler, null);
-
-        PcapPacket packet = new PcapPacket(JMemory.Type.POINTER);
-        int count = 0;
-        while (pcap.nextEx(packet) == Pcap.NEXT_EX_OK) {
-            System.out.println("count:" + (++count));
-            Http http = new Http();
-            if (packet.hasHeader(http)) {
-                System.out.println(http);
-            }
-        }
-        pcap.close();
+    /**
+     * 数据包捕获监听
+     */
+    public interface OnCapturePacketListener {
+        /**
+         * 每当捕获到一个数据包时被调用
+         * @param packet 被捕获的数据包，该数据包指向一个临时存储区，不要保存这个引用，
+         *               如果需要保存数据包使用{@code new PcapPacket(packet);}创建一个新的副本
+         */
+        void onCapture(PcapPacket packet);
     }
 }

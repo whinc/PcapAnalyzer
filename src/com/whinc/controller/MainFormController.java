@@ -16,6 +16,7 @@ import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.jnetpcap.PcapIf;
+import org.jnetpcap.packet.PcapPacket;
 
 import java.io.File;
 import java.util.List;
@@ -117,7 +118,17 @@ public class MainFormController {
         ObservableList data = tableView.getItems();
         data.clear();
         Config.setTimestamp(Config.DEFAULT_TIMESTAMP);
-        PcapManager.getInstance().startCapture(file.getAbsolutePath(), data);
+
+        // 捕获离线数据包
+        PcapManager.getInstance().captureOffline(file, packet -> {
+            // 将第一个数据包的时间戳设置为起始时间
+            if (Config.getTimestamp() <= Config.DEFAULT_TIMESTAMP) {
+                Config.setTimestamp(packet.getCaptureHeader().timestampInMicros());
+            }
+
+            PcapPacket packetCopy = new PcapPacket(packet); // 获取副本
+            data.add(new PacketInfo(packetCopy));
+        });
     }
 
     @FXML

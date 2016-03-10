@@ -17,7 +17,7 @@ public class PacketInfo {
     private PcapPacket packet;
 
     public PacketInfo(PcapPacket packet) {
-        this.packet = new PcapPacket(packet);
+        this.packet = packet;
     }
 
     public long getNumber() {

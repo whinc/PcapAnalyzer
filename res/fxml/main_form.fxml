@@ -60,7 +60,7 @@
                   </VBox>
                </content>
           </Tab>
-          <Tab text="Untitled Tab 2">
+          <Tab text="2">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
             </content>
