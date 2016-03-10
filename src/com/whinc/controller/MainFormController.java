@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.PcapPacket;
 
@@ -156,17 +157,16 @@ public class MainFormController {
         source.setDisable(true);
         menuItemStop.setDisable(false);
 
-        // 开始捕获数据包
-        boolean result = PcapManager.getInstance().startCapture(tableView.getItems(), new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                tableView.scrollTo(tableView.getItems().size());
+        PcapManager.getInstance().captureLive(packet -> {
+            // 将第一个数据包的时间戳设置为起始时间
+            if (Config.getTimestamp() <= Config.DEFAULT_TIMESTAMP) {
+                Config.setTimestamp(packet.getCaptureHeader().timestampInMicros());
             }
-        });
 
-        if (result) {
-            setStatusInfo(Config.getString("label_pcap_running"));
-        }
+            PcapPacket packetCopy = new PcapPacket(packet); // 获取副本
+            ObservableList items = tableView.getItems();
+            items.add(new PacketInfo(packetCopy));
+        });
     }
 
     @FXML protected void stopCapture(ActionEvent event) {

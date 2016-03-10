@@ -6,7 +6,7 @@ import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.protocol.network.Ip4;
 
 /**
- * Created by Administrator on 2016/3/5.
+ * {@link PacketInfo}获取数据包的相关信息，内部只保存{@link PcapPacket}的引用
  */
 public class PacketInfo {
 

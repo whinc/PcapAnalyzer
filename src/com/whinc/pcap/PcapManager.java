@@ -1,29 +1,16 @@
 package com.whinc.pcap;
 
-import com.whinc.Config;
 import com.whinc.model.NetworkAdapter;
-import com.whinc.model.PacketInfo;
-import javafx.beans.value.ChangeListener;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.event.Event;
 import org.jnetpcap.Pcap;
-import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.nio.JMemory;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
-import org.jnetpcap.protocol.lan.Ethernet;
-import org.jnetpcap.protocol.network.Ip4;
-import org.jnetpcap.protocol.tcpip.Http;
-import org.jnetpcap.protocol.tcpip.Tcp;
-import org.jnetpcap.protocol.tcpip.Udp;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Created by Administrator on 2016/3/4.
@@ -59,14 +46,10 @@ public class PcapManager {
         return pcapIfs;
     }
 
-    /**
-     * 实时捕获网络适配器数据包
-     * @param packetInfos
-     */
-    public boolean startCapture(ObservableList<PacketInfo> packetInfos, ChangeListener changeListener) {
+    public void captureLive(OnCapturePacketListener listener) {
         if (networkAdapter == null || networkAdapter.getPcapIf() == null) {
             System.err.println("Network adapter is null");
-            return false;
+            return ;
         }
         stopCapture();
 
@@ -79,7 +62,7 @@ public class PcapManager {
                 errBuf);
         if (pcap == null) {
             System.err.println("Error while open device interface:" + errBuf);
-            return false;
+            return ;
         }
 
         task = new Task<Void>() {
@@ -91,12 +74,15 @@ public class PcapManager {
 
                     @Override
                     public void nextPacket(PcapPacket pcapPacket, Void aVoid) {
-                        if (Config.getTimestamp() <= Config.DEFAULT_TIMESTAMP) {
-                            Config.setTimestamp(pcapPacket.getCaptureHeader().timestampInMicros());
+//                        if (Config.getTimestamp() <= Config.DEFAULT_TIMESTAMP) {
+//                            Config.setTimestamp(pcapPacket.getCaptureHeader().timestampInMicros());
+//                        }
+//                        packetInfos.add(new PacketInfo(pcapPacket));
+//                        // 通知更新
+//                        updateProgress(packetInfos.size(), Long.MAX_VALUE);
+                        if (listener != null) {
+                            listener.onCapture(pcapPacket);
                         }
-                        packetInfos.add(new PacketInfo(pcapPacket));
-                        // 通知更新
-                        updateProgress(packetInfos.size(), Long.MAX_VALUE);
                     }
                 };
                 pcap.loop(-1, handler, null);
@@ -105,13 +91,10 @@ public class PcapManager {
             }
 
         };
-        if (changeListener != null) {
-            task.progressProperty().addListener(changeListener);
-        }
+
         Thread thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();
-        return true;
     }
 
     /**
