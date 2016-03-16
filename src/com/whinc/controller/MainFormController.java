@@ -91,8 +91,9 @@ public class MainFormController {
         tableView.setOnMouseClicked(event -> {
             int selectedIndex = tableView.getSelectionModel().getSelectedIndex();
             ObservableList<PacketInfo> items = tableView.getItems();
-            packetDetailText.setText(items.get(selectedIndex).getPacket().toString());
-//            System.out.println("select row:" + selectedIndex);
+            if (selectedIndex >= 0 && selectedIndex < items.size()) {
+                packetDetailText.setText(items.get(selectedIndex).getPacket().toString());
+            }
         });
 
         System.out.println("End initialize");
@@ -213,5 +214,11 @@ public class MainFormController {
     private void setStatusText(String text, Paint paint) {
         statusInfoLabel.setText(text);
         statusInfoLabel.setTextFill(paint);
+    }
+
+    @FXML protected void exit(ActionEvent event) {
+        if (stage != null) {
+            stage.close();
+        }
     }
 }
