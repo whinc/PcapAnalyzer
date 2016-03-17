@@ -34,7 +34,10 @@
                <MenuItem onAction="#showCaptureOptions" text="%menu_options" />
                <MenuItem onAction="#clear" text="%menu_clear" />
            </Menu>
-           <Menu text="%menu_about" />
+           <Menu text="%menu_analyze"/>
+           <Menu text="%menu_help" >
+               <MenuItem text="%menu_about" onAction="#showAboutDialog"/>
+           </Menu>
        </MenuBar>
       <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
         <tabs>

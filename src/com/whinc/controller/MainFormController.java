@@ -225,4 +225,12 @@ public class MainFormController {
     @FXML public void clear(ActionEvent event) {
         tableView.getItems().clear();
     }
+
+    @FXML public void showAboutDialog(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.NONE,
+                "Author: whinc\n\nE-mail: xiaohui_hubei@163.com\n",
+                ButtonType.OK);
+        alert.setTitle("About");
+        alert.showAndWait();
+    }
 }
