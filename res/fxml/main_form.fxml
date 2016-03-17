@@ -32,6 +32,7 @@
                <MenuItem fx:id="menuItemStart" onAction="#startCapture" text="%menu_start" />
                <MenuItem fx:id="menuItemStop" disable="true" onAction="#stopCapture" text="%menu_stop" />
                <MenuItem onAction="#showCaptureOptions" text="%menu_options" />
+               <MenuItem onAction="#clear" text="%menu_clear" />
            </Menu>
            <Menu text="%menu_about" />
        </MenuBar>

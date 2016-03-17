@@ -221,4 +221,8 @@ public class MainFormController {
             stage.close();
         }
     }
+
+    @FXML public void clear(ActionEvent event) {
+        tableView.getItems().clear();
+    }
 }
