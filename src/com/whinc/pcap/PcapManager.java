@@ -3,6 +3,7 @@ package com.whinc.pcap;
 import com.whinc.model.NetworkAdapter;
 import javafx.concurrent.Task;
 import org.jnetpcap.Pcap;
+import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.nio.JMemory;
 import org.jnetpcap.packet.PcapPacket;
@@ -19,6 +20,50 @@ public class PcapManager {
     private static final PcapManager pcapManager = new PcapManager();
     private Task<Void> task;
     private Pcap pcap;
+    private NetworkAdapter networkAdapter;
+    private String filterExp;               // libpcap捕获过滤表达式
+
+    private PcapManager() {}
+
+    public static PcapManager getInstance() {
+        return pcapManager;
+    }
+
+    public static boolean compile(String interfaceName, String filter) {
+
+        StringBuilder errBuf = new StringBuilder();
+        Pcap pcap = Pcap.openLive(interfaceName,
+                Pcap.DEFAULT_SNAPLEN,
+                Pcap.DEFAULT_PROMISC,
+                Pcap.DEFAULT_TIMEOUT,
+                errBuf);
+
+        if (pcap == null) {
+            System.err.println("Error while open device interface:" + errBuf);
+            return false;
+        }
+
+        PcapBpfProgram program = new PcapBpfProgram();
+        int optimize = 0;
+        int netmask = 0xFFFFFF00;
+        if (pcap.compile(program, filter, optimize, netmask) != Pcap.OK) {
+            return false;
+        }
+
+        pcap.close();
+        return true;
+//        int len = 64 * 1024;
+//        int datalinkType = Ethernet.EthernetType.IP4.getId();
+//        int optimize = 0;
+//        int netmask = 0xFFFFFF00;
+//        filterProgram = new PcapBpfProgram();
+//        if (Pcap.compileNoPcap(len, datalinkType, filterProgram, filter, 0, netmask) != Pcap.OK) {
+//            filterProgram = null;       // 如果编译失败将其置为null，避免错误使用
+//            System.err.println("error");
+//            return false;
+//        }
+//        return true;
+    }
 
     public NetworkAdapter getNetworkAdapter() {
         return networkAdapter;
@@ -28,12 +73,12 @@ public class PcapManager {
         this.networkAdapter = networkAdapter;
     }
 
-    private NetworkAdapter networkAdapter;
+    public String getFilterExp() {
+        return filterExp;
+    }
 
-    private PcapManager() {}
-
-    public static PcapManager getInstance() {
-        return pcapManager;
+    public void setFilterExp(String filterExp) {
+        this.filterExp = filterExp;
     }
 
     public List<PcapIf> getDeviceList() {
@@ -63,6 +108,17 @@ public class PcapManager {
         if (pcap == null) {
             System.err.println("Error while open device interface:" + errBuf);
             return ;
+        }
+
+        if (filterExp != null && !filterExp.isEmpty()) {
+            int optimize = 1;
+            int netmask = 0xFFFFFF00;
+            PcapBpfProgram program = new PcapBpfProgram();
+            if (pcap.compile(program, filterExp, optimize, netmask) != Pcap.OK) {
+                System.err.println("Invalid capture filter expression!");
+            } else {
+                pcap.setFilter(program);
+            }
         }
 
         task = new Task<Void>() {
