@@ -3,6 +3,7 @@ package com.whinc.controller;
 import com.whinc.Config;
 import com.whinc.model.NetworkAdapter;
 import com.whinc.model.PacketInfo;
+import com.whinc.pcap.ClusterModule;
 import com.whinc.pcap.PcapManager;
 import com.whinc.ui.OptionDialog;
 import javafx.beans.property.SimpleStringProperty;
@@ -232,5 +233,13 @@ public class MainFormController {
                 ButtonType.OK);
         alert.setTitle("About");
         alert.showAndWait();
+    }
+
+    @FXML public void extractVector(ActionEvent event) {
+        // 先停止捕获
+        stopCapture(new ActionEvent(menuItemStop, null));
+
+        // 提取网络流行为特征
+        ClusterModule.getInstance().extractVector(tableView.getItems());
     }
 }

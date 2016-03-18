@@ -18,3 +18,8 @@
 
 * 安装 libpcap
 * 运行时指定 libpcap 和 JNetPcap 共享库的搜索目录
+
+下面是运行命令：
+```
+java -cp .;<path to jnetpcap.jar> -Djava.library.path=<path to share library> com/whinc/Main
+```

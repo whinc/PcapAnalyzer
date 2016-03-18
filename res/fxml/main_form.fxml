@@ -21,10 +21,6 @@
        <MenuBar>
            <Menu text="%menu_file">
                <MenuItem onAction="#openFile" text="%menu_open" />
-               <Menu text="%menu_lang">
-                   <MenuItem id="lang_en" onAction="#switchLanguage" text="%menu_en" />
-                   <!--<MenuItem id="lang_zh" text="%menu_zh" onAction="#switchLanguage"/>-->
-               </Menu>
                <SeparatorMenuItem />
                <MenuItem text="%menu_exit" onAction="#exit"/>
            </Menu>
@@ -34,8 +30,14 @@
                <MenuItem onAction="#showCaptureOptions" text="%menu_options" />
                <MenuItem onAction="#clear" text="%menu_clear" />
            </Menu>
-           <Menu text="%menu_analyze"/>
+           <Menu text="%menu_analyze">
+               <MenuItem text="%menu_extract_vector" onAction="#extractVector"/>
+           </Menu>
            <Menu text="%menu_help" >
+               <Menu text="%menu_lang">
+                   <MenuItem id="lang_en" onAction="#switchLanguage" text="%menu_en" />
+                   <!--<MenuItem id="lang_zh" text="%menu_zh" onAction="#switchLanguage"/>-->
+               </Menu>
                <MenuItem text="%menu_about" onAction="#showAboutDialog"/>
            </Menu>
        </MenuBar>
@@ -64,7 +66,7 @@
                   </VBox>
                </content>
           </Tab>
-          <Tab text="2">
+          <Tab text="Output Log">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
             </content>
