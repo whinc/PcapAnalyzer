@@ -11,7 +11,6 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -22,7 +21,7 @@
            <Menu text="%menu_file">
                <MenuItem onAction="#openFile" text="%menu_open" />
                <SeparatorMenuItem />
-               <MenuItem text="%menu_exit" onAction="#exit"/>
+               <MenuItem onAction="#exit" text="%menu_exit" />
            </Menu>
            <Menu text="%menu_capture">
                <MenuItem fx:id="menuItemStart" onAction="#startCapture" text="%menu_start" />
@@ -31,17 +30,17 @@
                <MenuItem onAction="#clear" text="%menu_clear" />
            </Menu>
            <Menu text="%menu_analyze">
-               <MenuItem text="%menu_extract_vector" onAction="#extractVector"/>
+               <MenuItem onAction="#extractVector" text="%menu_extract_vector" />
            </Menu>
-           <Menu text="%menu_help" >
+           <Menu text="%menu_help">
                <Menu text="%menu_lang">
                    <MenuItem id="lang_en" onAction="#switchLanguage" text="%menu_en" />
                    <!--<MenuItem id="lang_zh" text="%menu_zh" onAction="#switchLanguage"/>-->
                </Menu>
-               <MenuItem text="%menu_about" onAction="#showAboutDialog"/>
+               <MenuItem onAction="#showAboutDialog" text="%menu_about" />
            </Menu>
        </MenuBar>
-      <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+      <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
         <tabs>
           <Tab closable="false" text="%label_packet_parse">
                <content>
@@ -66,10 +65,14 @@
                   </VBox>
                </content>
           </Tab>
-          <Tab text="Output Log">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-            </content>
+          <Tab text="Output Log" fx:id="logTab">
+               <content>
+                  <VBox prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <TextArea fx:id="logText" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" promptText="There is no log."/>
+                     </children>
+                  </VBox>
+               </content>
           </Tab>
         </tabs>
       </TabPane>

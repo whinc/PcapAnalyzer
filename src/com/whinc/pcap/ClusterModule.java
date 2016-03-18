@@ -25,7 +25,7 @@ public class ClusterModule {
         converge(data);
 
         // 打印输出
-        System.out.println(this);
+//        System.out.println(this);
     }
 
     /**

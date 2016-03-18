@@ -7,8 +7,6 @@ import com.whinc.pcap.ClusterModule;
 import com.whinc.pcap.PcapManager;
 import com.whinc.ui.OptionDialog;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,11 +14,13 @@ import javafx.scene.control.*;
 import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.PcapPacket;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,8 +28,12 @@ import java.util.Optional;
  * Created by Administrator on 2016/3/2.
  */
 public class MainFormController {
+    private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss S");
     @FXML  public Label statusInfoLabel;
     public TextArea packetDetailText;
+    @FXML public TextArea logText;
+    @FXML public Tab logTab;
+    @FXML public TabPane tabPane;
     private Stage stage;
     @FXML public MenuItem menuItemStop;
     @FXML private TableView tableView;
@@ -241,5 +245,18 @@ public class MainFormController {
 
         // 提取网络流行为特征
         ClusterModule.getInstance().extractVector(tableView.getItems());
+
+        appendLog(ClusterModule.getInstance().toString());
+        tabPane.getSelectionModel().select(logTab);
+    }
+
+    private void appendLog(String log) {
+        String datetime = LOG_DATE_FORMAT.format(Calendar.getInstance().getTime());
+
+        StringBuilder builder = new StringBuilder(logText.getText());
+        builder.append(datetime)
+                .append("\n")
+                .append(log);
+        logText.setText(builder.toString());
     }
 }
