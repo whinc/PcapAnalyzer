@@ -22,10 +22,13 @@ public class ClusterModule {
     }
 
     public void extractVector(List<PacketInfo> data) {
+        // 清除上次的数据
+        netFlows.clear();
+
+        // 汇聚网络流
         converge(data);
 
-        // 打印输出
-//        System.out.println(this);
+
     }
 
     /**

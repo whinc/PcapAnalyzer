@@ -252,11 +252,6 @@ public class MainFormController {
 
     private void appendLog(String log) {
         String datetime = LOG_DATE_FORMAT.format(Calendar.getInstance().getTime());
-
-        StringBuilder builder = new StringBuilder(logText.getText());
-        builder.append(datetime)
-                .append("\n")
-                .append(log);
-        logText.setText(builder.toString());
+        logText.appendText(datetime + "\n" + log);
     }
 }

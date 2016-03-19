@@ -12,7 +12,7 @@ import java.util.List;
  * Created by Administrator on 2016/3/18.
  */
 public class NetFlow {
-    List<PacketInfo> packetInfos = new ArrayList<>();
+    private final List<PacketInfo> packetInfos;
 
     // 数据包按下面5个属性来划分到网络流
     int srcIp;
@@ -24,11 +24,22 @@ public class NetFlow {
                             // 即数据包的目的ip和目的端口与网络流的源ip和目的端口相同
 
     public NetFlow(int srcIp, int dstIp, int srcPort, int dstPort) {
-        this.srcIp = srcIp;
-        this.dstIp = dstIp;
-        this.srcPort = srcPort;
-        this.dstPort = dstPort;
-        this.reversed = false;
+        int ip_1 = (srcIp & 0xFF000000) >>> 24;   // IP地址第一个字节
+        int ip_2 = (srcIp & 0x00FF0000) >> 16;    // IP地址第二个字节
+        if (ip_1 == 192 && ip_2 == 168) {       // 如果是本地IP地址则视为本机地址
+            this.srcIp = srcIp;
+            this.dstIp = dstIp;
+            this.srcPort = srcPort;
+            this.dstPort = dstPort;
+            this.reversed = false;
+        } else {
+            this.srcIp = dstIp;
+            this.dstIp = srcIp;
+            this.srcPort = dstPort;
+            this.dstPort = srcPort;
+            this.reversed = true;
+        }
+        packetInfos = new ArrayList<>();
     }
 
     /**
@@ -71,12 +82,13 @@ public class NetFlow {
 
     @Override
     public String toString() {
-        return String.format("%d.%d.%d.%d:%d -> %d.%d.%d.%d:%d, size:%d",
+        return String.format("%d.%d.%d.%d:%d %s %d.%d.%d.%d:%d, size:%d",
                 (srcIp & 0xFF000000) >>> 24,
                 (srcIp & 0x00FF0000) >>> 16,
                 (srcIp & 0x0000FF00) >>> 8,
                 (srcIp & 0x000000FF),
                 srcPort,
+                reversed ? "<-" : "->",
                 (dstIp & 0xFF000000) >>> 24,
                 (dstIp & 0x00FF0000) >>> 16,
                 (dstIp & 0x0000FF00) >>> 8,
