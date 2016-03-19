@@ -10,14 +10,24 @@ import org.jnetpcap.protocol.network.Ip4;
  */
 public class PacketInfo {
 
-    public PcapPacket getPacket() {
-        return packet;
-    }
-
+    /** 标识数据包的流向。true表示数据包发出，false表示数据包流入*/
+    boolean reversed;
     private PcapPacket packet;
 
     public PacketInfo(PcapPacket packet) {
         this.packet = packet;
+    }
+
+    public PcapPacket getPacket() {
+        return packet;
+    }
+
+    public boolean isReversed() {
+        return reversed;
+    }
+
+    public void setReversed(boolean reversed) {
+        this.reversed = reversed;
     }
 
     public long getNumber() {

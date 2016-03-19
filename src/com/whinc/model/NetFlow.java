@@ -14,32 +14,242 @@ import java.util.List;
 public class NetFlow {
     private final List<PacketInfo> packetInfos;
 
-    // 数据包按下面5个属性来划分到网络流
+    /* 数据包按下面5个属性来划分到网络流 */
+
+    /** 源IP地址 */
     int srcIp;
+    /** 目的IP地址 */
     int dstIp;
+    /** 源端口 */
     int srcPort;
+    /** 目的端口 */
     int dstPort;
-    boolean reversed;       // 逆向相等，
-                            // 即数据包的源ip和源端口与网络流的目的ip和目的端口相同，
-                            // 即数据包的目的ip和目的端口与网络流的源ip和目的端口相同
+    /* 网络流行为特征 */
+    long inTotalPacketNum;
+    /** 流入数据包的总字节大小 */
+    int inTotalPacketVolume;
+    /** 流入数据包的平均字节大小 */
+    float inAveragePacketLen;
+    /** 流入数据包的大小的均方差 */
+    float inPacketLenStdDeviation;
+    /** 流入数据包的最大间隔时间 */
+    float inPacketMaxIntervalTime;
+    /** 流入数据包的平均间隔时间 */
+    float inPacketAverageIntervalTime;
+    /** 流入数据包的最小间隔时间 */
+    float inPacketMinIntervalTime;
+    long outTotalPacketNum;
+    /** 流出数据包的总字节大小 */
+    int outTotalPacketVolume;
+    /** 流出数据包的平均字节大小 */
+    float outAveragePacketLen;
+    /** 流出数据包的大小的均方差 */
+    float outPacketLenStdDeviation;
+    /** 流出数据包的最大间隔时间 */
+    float outPacketMaxIntervalTime;
+    /** 流出数据包的平均间隔时间 */
+    float outPacketAverageIntervalTime;
+    /** 流出数据包的最小间隔时间 */
+    float outPacketMinIntervalTime;
+    /** 流入流出数据流量比值 */
+    float inOutPacketVolumeRatio;
+    /** 流入流出数据包数量比 */
+    float inOutPacketNumRatio;
+    /** 用于标识当前网络流行为特征数据是否有效，如果增减数据包会导致数据失效，需要重新计算 */
+    private boolean invalid = true;
 
     public NetFlow(int srcIp, int dstIp, int srcPort, int dstPort) {
         int ip_1 = (srcIp & 0xFF000000) >>> 24;   // IP地址第一个字节
         int ip_2 = (srcIp & 0x00FF0000) >>> 16;    // IP地址第二个字节
-        if (ip_1 == 192 && ip_2 == 168) {       // 如果是本地IP地址则视为本机地址
+        if (ip_1 == 192 && ip_2 == 168) {       // 如果是本地IP地址则视为源主机地址
             this.srcIp = srcIp;
             this.dstIp = dstIp;
             this.srcPort = srcPort;
             this.dstPort = dstPort;
-            this.reversed = false;
         } else {
             this.srcIp = dstIp;
             this.dstIp = srcIp;
             this.srcPort = dstPort;
             this.dstPort = srcPort;
-            this.reversed = true;
         }
         packetInfos = new ArrayList<>();
+    }
+
+    /** 检查数据有效性，如果无效则更新数据 */
+    private void check() {
+        if (invalid) {
+            update();
+        }
+    }
+
+    private void update() {
+        // 重置
+        inTotalPacketNum = 0;
+        inTotalPacketVolume = 0;
+        inAveragePacketLen = 0;
+        inPacketLenStdDeviation = 0.0f;
+        inPacketMaxIntervalTime = 0.0f;
+        inPacketAverageIntervalTime = 0.0f;
+        inPacketMinIntervalTime = 0.0f;
+
+        outTotalPacketNum = 0;
+        outTotalPacketVolume = 0;
+        outAveragePacketLen = 0;
+        outPacketLenStdDeviation = 0.0f;
+        outPacketMaxIntervalTime = 0.0f;
+        outPacketAverageIntervalTime = 0.0f;
+        outPacketMinIntervalTime = 0.0f;
+
+        inOutPacketVolumeRatio = 0.0f;
+        inOutPacketNumRatio = 0.0f;
+
+        // 更新数据
+        long lastInPktTimestamp = 0L;
+        long totalInPktIntervalTime = 0L;
+        long lastOutPktTimestamp = 0L;
+        long totalOutPktIntervalTime = 0L;
+        for (PacketInfo pkt : packetInfos) {
+            if (pkt.isReversed()) {     // 流入数据包
+                inTotalPacketNum += 1;
+                inTotalPacketVolume += pkt.getLength();
+
+                // 时间戳
+                if (lastInPktTimestamp == 0) {
+                    lastInPktTimestamp = pkt.getTimestamp();
+                } else {
+                    long inInterval = pkt.getTimestamp() - lastInPktTimestamp;
+                    if (inInterval > inPacketMaxIntervalTime) {
+                        inPacketMaxIntervalTime = inInterval;
+                    } else if (inInterval < inPacketMinIntervalTime) {
+                        inPacketMinIntervalTime = inInterval;
+                    }
+                    totalInPktIntervalTime += inInterval;
+                }
+
+            } else {                    // 流出数据包
+                outTotalPacketNum += 1;
+                outTotalPacketVolume += pkt.getLength();
+
+                // 时间戳
+                if (lastOutPktTimestamp == 0) {
+                    lastOutPktTimestamp = pkt.getTimestamp();
+                } else {
+                    long outInterval = pkt.getTimestamp() - lastOutPktTimestamp;
+                    if (outInterval > outPacketMaxIntervalTime) {
+                        outPacketMaxIntervalTime = outInterval;
+                    } else if (outInterval < outPacketMinIntervalTime) {
+                        outPacketMinIntervalTime = outInterval;
+                    }
+                    totalOutPktIntervalTime += outInterval;
+                }
+            }
+        }
+        // 计算数据包达到的平均间隔时间
+        inPacketAverageIntervalTime = totalInPktIntervalTime / inTotalPacketNum;
+        outPacketAverageIntervalTime = totalOutPktIntervalTime / outTotalPacketNum;
+
+        // 计算数据包平均大小
+        inAveragePacketLen = (float) inTotalPacketVolume / inTotalPacketNum;
+        outAveragePacketLen = (float) outTotalPacketVolume / outTotalPacketNum;
+
+        // 计算网络流中数据包大小的均方差
+        for (PacketInfo pkt : packetInfos) {
+            if (pkt.isReversed()) {     // 流入数据包
+                float v = pkt.getLength() - inAveragePacketLen;
+                inPacketLenStdDeviation += (v * v);
+            } else {                    // 流出数据包
+                float v = pkt.getLength() - outAveragePacketLen;
+                outPacketLenStdDeviation += (v * v);
+            }
+        }
+        inPacketLenStdDeviation /= inTotalPacketNum;
+
+        inOutPacketNumRatio = (float) inTotalPacketNum / outTotalPacketNum;
+        inOutPacketVolumeRatio = (float) inTotalPacketVolume / outTotalPacketVolume;
+
+        invalid = false;        // 标记数据为有效状态
+    }
+
+    /** 流入数据包的总数 */
+    public long getInTotalPacketNum() {
+        check();
+        return inTotalPacketNum;
+    }
+
+    public int getInTotalPacketVolume() {
+        check();
+        return inTotalPacketVolume;
+    }
+
+    public float getInAveragePacketLen() {
+        check();
+        return inAveragePacketLen;
+    }
+
+    public float getInPacketLenStdDeviation() {
+        check();
+        return inPacketLenStdDeviation;
+    }
+
+    public float getInPacketMaxIntervalTime() {
+        check();
+        return inPacketMaxIntervalTime;
+    }
+
+    public float getInPacketAverageIntervalTime() {
+        check();
+        return inPacketAverageIntervalTime;
+    }
+
+    public float getInPacketMinIntervalTime() {
+        check();
+        return inPacketMinIntervalTime;
+    }
+
+    /** 流出数据包的总数 */
+    public long getOutTotalPacketNum() {
+        check();
+        return outTotalPacketNum;
+    }
+
+    public int getOutTotalPacketVolume() {
+        check();
+        return outTotalPacketVolume;
+    }
+
+    public float getOutAveragePacketLen() {
+        check();
+        return outAveragePacketLen;
+    }
+
+    public float getOutPacketLenStdDeviation() {
+        check();
+        return outPacketLenStdDeviation;
+    }
+
+    public float getOutPacketMaxIntervalTime() {
+        check();
+        return outPacketMaxIntervalTime;
+    }
+
+    public float getOutPacketAverageIntervalTime() {
+        check();
+        return outPacketAverageIntervalTime;
+    }
+
+    public float getOutPacketMinIntervalTime() {
+        check();
+        return outPacketMinIntervalTime;
+    }
+
+    public float getInOutPacketVolumeRatio() {
+        check();
+        return inOutPacketVolumeRatio;
+    }
+
+    public float getInOutPacketNumRatio() {
+        check();
+        return inOutPacketNumRatio;
     }
 
     /**
@@ -59,13 +269,13 @@ public class NetFlow {
                     && ip4.destinationToInt() == dstIp
                     && tcp.source() == srcPort
                     && tcp.destination() == dstPort) {
-                reversed = false;
+                packetInfo.setReversed(false);
                 b = true;
             } else if (ip4.sourceToInt() == dstIp
                     && ip4.destinationToInt() == srcIp
                     && tcp.source() == dstPort
                     && tcp.destination() == srcPort) {
-                reversed = true;
+                packetInfo.setReversed(true);
                 b = true;
             }
         }
@@ -78,23 +288,34 @@ public class NetFlow {
      */
     public void add(PacketInfo packetInfo) {
         packetInfos.add(packetInfo);
+        invalid = true;     // 标记数据为无效
     }
 
     @Override
     public String toString() {
-        return String.format("%d.%d.%d.%d:%d %s %d.%d.%d.%d:%d, size:%d",
+        return String.format("%d.%d.%d.%d:%d - %d.%d.%d.%d:%d, " +
+                "in:%d, out:%d, total:%d, " +
+                "inPktLenStdDeviation:%.1f Bytes, outPktLenStdDeviation:%.1f Bytes," +
+                "inAveragePktLen:%.1f Bytes, outAveragePktLen:%.1f Bytes," +
+                "inMaxInterval:%.1f ms, inMinInterval:%.1f ms, inAverageInterval:%.1f ms," +
+                "outMaxInterval:%.1f ms, outMinInterval:%.1f ms, outAverageInterval:%.1f ms," +
+                "inOutPktVolumeRatio:%.1f, inOutPktNumRatio:%.1f",
                 (srcIp & 0xFF000000) >>> 24,
                 (srcIp & 0x00FF0000) >>> 16,
                 (srcIp & 0x0000FF00) >>> 8,
                 (srcIp & 0x000000FF),
                 srcPort,
-                reversed ? "<-" : "->",
                 (dstIp & 0xFF000000) >>> 24,
                 (dstIp & 0x00FF0000) >>> 16,
                 (dstIp & 0x0000FF00) >>> 8,
                 (dstIp & 0x000000FF),
                 dstPort,
-                packetInfos.size()
+                getInTotalPacketNum(), getOutTotalPacketNum(), packetInfos.size(),
+                inPacketLenStdDeviation, outPacketLenStdDeviation,
+                inAveragePacketLen, outAveragePacketLen,
+                inPacketMaxIntervalTime, inPacketMinIntervalTime, inPacketAverageIntervalTime,
+                outPacketMaxIntervalTime, outPacketMinIntervalTime, outPacketAverageIntervalTime,
+                inOutPacketVolumeRatio, inOutPacketNumRatio
                 );
     }
 }
