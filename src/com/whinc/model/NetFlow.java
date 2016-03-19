@@ -25,7 +25,7 @@ public class NetFlow {
 
     public NetFlow(int srcIp, int dstIp, int srcPort, int dstPort) {
         int ip_1 = (srcIp & 0xFF000000) >>> 24;   // IP地址第一个字节
-        int ip_2 = (srcIp & 0x00FF0000) >> 16;    // IP地址第二个字节
+        int ip_2 = (srcIp & 0x00FF0000) >>> 16;    // IP地址第二个字节
         if (ip_1 == 192 && ip_2 == 168) {       // 如果是本地IP地址则视为本机地址
             this.srcIp = srcIp;
             this.dstIp = dstIp;
