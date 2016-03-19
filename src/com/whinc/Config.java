@@ -11,8 +11,8 @@ import java.util.ResourceBundle;
  */
 public class Config {
     public static final String CONFIG_FILE = "config.xml";
-//    public static Locale DEFAULT_LOCALE = Locale.CHINESE;
-    public static Locale DEFAULT_LOCALE = Locale.ENGLISH;
+    public static Locale DEFAULT_LOCALE = Locale.CHINESE;
+//    public static Locale DEFAULT_LOCALE = Locale.ENGLISH;
     public static final long DEFAULT_TIMESTAMP = 0L;
     private static long timestamp = DEFAULT_TIMESTAMP;      // microsecond
 

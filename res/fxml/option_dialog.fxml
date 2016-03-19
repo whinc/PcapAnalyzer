@@ -22,7 +22,7 @@
       </TableView>
       <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="200.0">
          <children>
-            <Label text="Label">
+            <Label text="%label_capture_filter">
                <HBox.margin>
                   <Insets right="10.0" />
                </HBox.margin>

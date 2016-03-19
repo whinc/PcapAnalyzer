@@ -65,7 +65,7 @@
                   </VBox>
                </content>
           </Tab>
-          <Tab fx:id="logTab" text="Output Log">
+          <Tab fx:id="logTab" text="%label_output_log">
                <content>
                   <VBox prefHeight="200.0" prefWidth="100.0">
                      <children>

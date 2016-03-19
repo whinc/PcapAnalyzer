@@ -309,12 +309,12 @@ public class NetFlow {
     @Override
     public String toString() {
         return String.format("%d.%d.%d.%d:%d - %d.%d.%d.%d:%d, " +
-                "in:%d, out:%d, total:%d, " +
-                "inPktLenStdDeviation:%.1f Bytes, outPktLenStdDeviation:%.1f Bytes," +
-                "inAveragePktLen:%.1f Bytes, outAveragePktLen:%.1f Bytes," +
-                "inMaxInterval:%.1f us, inMinInterval:%.1f us, inAverageInterval:%.1f us," +
-                "outMaxInterval:%.1f us, outMinInterval:%.1f us, outAverageInterval:%.1f us," +
-                "inOutPktVolumeRatio:%.1f, inOutPktNumRatio:%.1f",
+                "流入:%d, 留出:%d, 总共:%d, \n" +
+                "流入数据包长度均方差:%.1f Bytes, 流出数据包长度均方差:%.1f Bytes,\n" +
+                "流入数据包平均长度:%.1f Bytes, 流出数据包平均长度:%.1f Bytes,\n" +
+                "流入数据包最大间隔时间:%.1f us, 流入数据包最小间隔时间:%.1f us, 流入数据包平均间隔时间:%.1f us,\n" +
+                "流出数据包最大间隔时间:%.1f us, 流出数据包最小间隔时间:%.1f us, 流出数据包平均间隔时间:%.1f us,\n" +
+                "流入/流出数据包流量比:%.1f, 流入/流出数据包数量比:%.1f\n",
                 (srcIp & 0xFF000000) >>> 24,
                 (srcIp & 0x00FF0000) >>> 16,
                 (srcIp & 0x0000FF00) >>> 8,
