@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="710.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="710.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <TableView id="tableView" editable="true" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
         <columns>
@@ -27,12 +27,12 @@
                   <Insets right="10.0" />
                </HBox.margin>
             </Label>
-            <TextField fx:id="filterExpTxt" promptText="Enter capture filter expression" HBox.hgrow="ALWAYS" disable="true">
+            <TextField fx:id="filterExpTxt" disable="true" promptText="Enter capture filter expression" HBox.hgrow="ALWAYS">
                <cursor>
-                  <Cursor fx:constant="W_RESIZE" />
+                  <Cursor fx:constant="TEXT" />
                </cursor>
             </TextField>
-            <Button fx:id="compileBtn" mnemonicParsing="false" text="Compile" disable="true" visible="false"/>
+            <Button fx:id="compileBtn" disable="true" mnemonicParsing="false" text="Compile" visible="false" />
          </children>
          <VBox.margin>
             <Insets left="10.0" right="10.0" />

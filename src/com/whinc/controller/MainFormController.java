@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.PcapPacket;
@@ -240,6 +241,10 @@ public class MainFormController {
     }
 
     @FXML public void extractVector(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.NONE, "Waiting...", ButtonType.CLOSE);
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.show();
+
         // 先停止捕获
         stopCapture(new ActionEvent(menuItemStop, null));
 
@@ -248,6 +253,8 @@ public class MainFormController {
 
         appendLog(ClusterModule.getInstance().toString());
         tabPane.getSelectionModel().select(logTab);
+
+        alert.close();
     }
 
     private void appendLog(String log) {

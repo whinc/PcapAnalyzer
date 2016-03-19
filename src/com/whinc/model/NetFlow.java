@@ -145,12 +145,20 @@ public class NetFlow {
             }
         }
         // 计算数据包达到的平均间隔时间
-        inPacketAverageIntervalTime = totalInPktIntervalTime / inTotalPacketNum;
-        outPacketAverageIntervalTime = totalOutPktIntervalTime / outTotalPacketNum;
+        if (inTotalPacketNum != 0) {
+            inPacketAverageIntervalTime = totalInPktIntervalTime / inTotalPacketNum;
+        }
+        if (outTotalPacketNum != 0) {
+            outPacketAverageIntervalTime = totalOutPktIntervalTime / outTotalPacketNum;
+        }
 
         // 计算数据包平均大小
-        inAveragePacketLen = (float) inTotalPacketVolume / inTotalPacketNum;
-        outAveragePacketLen = (float) outTotalPacketVolume / outTotalPacketNum;
+        if (inTotalPacketNum != 0) {
+            inAveragePacketLen = (float) inTotalPacketVolume / inTotalPacketNum;
+        }
+        if (outTotalPacketNum != 0) {
+            outAveragePacketLen = (float) outTotalPacketVolume / outTotalPacketNum;
+        }
 
         // 计算网络流中数据包大小的均方差
         for (PacketInfo pkt : packetInfos) {
@@ -162,9 +170,16 @@ public class NetFlow {
                 outPacketLenStdDeviation += (v * v);
             }
         }
-        inPacketLenStdDeviation /= inTotalPacketNum;
+        if (inTotalPacketNum != 0) {
+            inPacketLenStdDeviation /= inTotalPacketNum;
+        }
+        if (outTotalPacketNum != 0) {
+            outPacketLenStdDeviation /= outTotalPacketNum;
+        }
 
-        inOutPacketNumRatio = (float) inTotalPacketNum / outTotalPacketNum;
+        if (outTotalPacketNum != 0) {
+            inOutPacketNumRatio = (float) inTotalPacketNum / outTotalPacketNum;
+        }
         inOutPacketVolumeRatio = (float) inTotalPacketVolume / outTotalPacketVolume;
 
         invalid = false;        // 标记数据为有效状态
@@ -297,8 +312,8 @@ public class NetFlow {
                 "in:%d, out:%d, total:%d, " +
                 "inPktLenStdDeviation:%.1f Bytes, outPktLenStdDeviation:%.1f Bytes," +
                 "inAveragePktLen:%.1f Bytes, outAveragePktLen:%.1f Bytes," +
-                "inMaxInterval:%.1f ms, inMinInterval:%.1f ms, inAverageInterval:%.1f ms," +
-                "outMaxInterval:%.1f ms, outMinInterval:%.1f ms, outAverageInterval:%.1f ms," +
+                "inMaxInterval:%.1f us, inMinInterval:%.1f us, inAverageInterval:%.1f us," +
+                "outMaxInterval:%.1f us, outMinInterval:%.1f us, outAverageInterval:%.1f us," +
                 "inOutPktVolumeRatio:%.1f, inOutPktNumRatio:%.1f",
                 (srcIp & 0xFF000000) >>> 24,
                 (srcIp & 0x00FF0000) >>> 16,
