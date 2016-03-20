@@ -11,10 +11,13 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.Toggle?>
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="616.0" prefWidth="808.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.whinc.controller.MainFormController">
    <children>
        <MenuBar>
@@ -31,6 +34,12 @@
            </Menu>
            <Menu text="%menu_analyze">
                <MenuItem onAction="#extractVector" text="%menu_extract_vector" />
+               <Menu text="%menu_kmeans_algorithm" fx:id="menuKmeansAlgorithm">
+                   <RadioMenuItem text="%menu_classic_kmeans" selected="true"/>
+                   <RadioMenuItem text="%menu_kmeans_pp" selected="false"/>
+                   <RadioMenuItem text="%menu_fuzzy_kmeans" selected="false"/>
+               </Menu>
+               <MenuItem text="%menu_kmeans_config"/>
            </Menu>
            <Menu text="%menu_help">
                <Menu text="%menu_lang">
@@ -65,6 +74,11 @@
                   </VBox>
                </content>
           </Tab>
+            <Tab text="%label_graphic_analyze">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+              </content>
+            </Tab>
           <Tab fx:id="logTab" text="%label_output_log">
                <content>
                   <VBox prefHeight="200.0" prefWidth="100.0">

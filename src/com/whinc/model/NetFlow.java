@@ -15,7 +15,6 @@ public class NetFlow {
     private final List<PacketInfo> packetInfos;
 
     /* 数据包按下面5个属性来划分到网络流 */
-
     /** 源IP地址 */
     int srcIp;
     /** 目的IP地址 */
@@ -24,10 +23,11 @@ public class NetFlow {
     int srcPort;
     /** 目的端口 */
     int dstPort;
+
     /* 网络流行为特征 */
     long inTotalPacketNum;
     /** 流入数据包的总字节大小 */
-    int inTotalPacketVolume;
+    long inTotalPacketVolume;
     /** 流入数据包的平均字节大小 */
     float inAveragePacketLen;
     /** 流入数据包的大小的均方差 */
@@ -40,7 +40,7 @@ public class NetFlow {
     float inPacketMinIntervalTime;
     long outTotalPacketNum;
     /** 流出数据包的总字节大小 */
-    int outTotalPacketVolume;
+    long outTotalPacketVolume;
     /** 流出数据包的平均字节大小 */
     float outAveragePacketLen;
     /** 流出数据包的大小的均方差 */
@@ -191,7 +191,7 @@ public class NetFlow {
         return inTotalPacketNum;
     }
 
-    public int getInTotalPacketVolume() {
+    public long getInTotalPacketVolume() {
         check();
         return inTotalPacketVolume;
     }
@@ -227,7 +227,7 @@ public class NetFlow {
         return outTotalPacketNum;
     }
 
-    public int getOutTotalPacketVolume() {
+    public long getOutTotalPacketVolume() {
         check();
         return outTotalPacketVolume;
     }

@@ -35,6 +35,7 @@ public class MainFormController {
     @FXML public TextArea logText;
     @FXML public Tab logTab;
     @FXML public TabPane tabPane;
+    @FXML public Menu menuKmeansAlgorithm;
     private Stage stage;
     @FXML public MenuItem menuItemStop;
     @FXML private TableView tableView;
@@ -100,6 +101,12 @@ public class MainFormController {
             if (selectedIndex >= 0 && selectedIndex < items.size()) {
                 packetDetailText.setText(items.get(selectedIndex).getPacket().toString());
             }
+        });
+
+        // Add radio menu item to toggle group.
+        ToggleGroup toggleGroup = new ToggleGroup();
+        menuKmeansAlgorithm.getItems().forEach(menuItem -> {
+            toggleGroup.getToggles().add((RadioMenuItem)menuItem);
         });
 
         System.out.println("End initialize");

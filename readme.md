@@ -23,3 +23,25 @@
 ```
 java -cp .;<path to jnetpcap.jar> -Djava.library.path=<path to share library> com/whinc/Main
 ```
+
+## 存在的问题
+
+* 相同两个主机之间多次会话会被认为是一个网络流，解决办法：三次握手开始作为一个网络流的开始，四次握手时作为一个网络流的结束。发现三次握手时应新建立一个网络流。结束的网络流不能再添加数据包进来。
+
+
+- inTotalPacketVolume:long
+- inAveragePacketLen:long
+- inPacketLenStdDeviation:float
+- inPacketMaxIntervalTime:float
+- inPacketAverageIntervalTime:float
+- inPacketMinIntervalTime:float
+- outTotalPacketNum:long
+- outTotalPacketVolume:long
+- outAveragePacketLen:float
+- outPacketLenStdDeviation:float
+- outPacketMaxIntervalTime:float
+- outPacketAverageIntervalTime:float
+- outPacketMinIntervalTime:float
+- inOutPacketVolumeRatio:float
+- inOutPacketNumRatio:float
+- invalid:boolean = true
