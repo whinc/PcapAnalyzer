@@ -1,19 +1,23 @@
 package com.whinc.controller;
 
-import com.sun.xml.internal.bind.v2.runtime.reflect.Lister;
 import com.whinc.Config;
+import com.whinc.algorithm.Eigenvector;
+import com.whinc.algorithm.Kmeans;
 import com.whinc.model.NetworkAdapter;
 import com.whinc.model.PacketInfo;
 import com.whinc.pcap.ClusterModule;
 import com.whinc.pcap.PcapManager;
 import com.whinc.ui.OptionDialog;
-import com.whinc.util.PacketUtils;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.chart.Chart;
 import javafx.scene.chart.PieChart;
+import javafx.scene.chart.ScatterChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -48,7 +52,9 @@ public class MainFormController {
      * 协议组成饼状图
      */
     @FXML
-    public PieChart protocolPieChart;
+    public PieChart pieChart;
+    @FXML
+    public ScatterChart scatterChart;
     private Stage stage;
     @FXML
     public MenuItem menuItemStop;
@@ -56,6 +62,7 @@ public class MainFormController {
     private TableView tableView;
     @FXML
     private MenuItem menuItemStart;
+    private Chart curVisibleChart = null;   // 记录当前可见的图表
 
     public Stage getStage() {
         return stage;
@@ -300,13 +307,15 @@ public class MainFormController {
     }
 
     /**
-     * 分析捕获的数据包中不同协议所在的比例
+     * 分析捕获的数据包中不同协议所在的比例，并通过饼状图显示
      */
     @FXML
-    public void analyzeProtocolComposition(ActionEvent event) {
+    public void plotPieChart(ActionEvent event) {
+        showChart(pieChart);
+
         stopCapture();
 
-        protocolPieChart.getData().clear();
+        pieChart.getData().clear();
         List<PacketInfo> packets = getPackets();
         List<PieChart.Data> dataList = new ArrayList<>();
         double total = 0;
@@ -325,7 +334,7 @@ public class MainFormController {
                 ++total;
             }
         }
-        protocolPieChart.getData().addAll(dataList);
+        pieChart.getData().addAll(dataList);
 
         if (!dataList.isEmpty()) {
             // 输出到日志面板
@@ -339,6 +348,53 @@ public class MainFormController {
             Alert alert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
             alert.setHeaderText("There is no data!");
             alert.showAndWait();
+        }
+    }
+
+    @FXML
+    protected void plotScatterChart() {
+        showChart(scatterChart);
+        scatterChart.getData().clear();
+
+        int k = 4;
+        Kmeans kmeans = new Kmeans(k);
+        Eigenvector[] dataset = new Eigenvector[10];
+        dataset[0] = new Eigenvector(1, 2);
+        dataset[1] = new Eigenvector(3, 3);
+        dataset[2] = new Eigenvector(3, 4);
+        dataset[3] = new Eigenvector(5, 6);
+        dataset[4] = new Eigenvector(8, 9);
+        dataset[5] = new Eigenvector(4, 5);
+        dataset[6] = new Eigenvector(6, 4);
+        dataset[7] = new Eigenvector(3, 9);
+        dataset[8] = new Eigenvector(5, 9);
+        dataset[9] = new Eigenvector(4, 2);
+        dataset[9] = new Eigenvector(1, 9);
+        dataset[9] = new Eigenvector(7, 8);
+        kmeans.setSampleSet(dataset);
+        kmeans.run();
+
+        List<List<Eigenvector>> centerList = kmeans.getCenterList();
+        for (int i = 0; i < centerList.size(); ++i) {
+            XYChart.Series<Object, Object> series = new XYChart.Series<>();
+            series.setName("Cluster" + (i+1));
+            List<Eigenvector> sampleList = centerList.get(i);
+            for (Eigenvector v : sampleList) {
+                double[] vector = v.getVector();
+                series.getData().add(new XYChart.Data<>(vector[0], vector[1]));
+            }
+            scatterChart.getData().add(series);
+        }
+    }
+
+    /**
+     * 显示图表，所有图表都调往该方法显示，可以确保当前只有一个图标对用户可见
+     * @param chart
+     */
+    private void showChart(Chart chart) {
+        if (curVisibleChart == null || curVisibleChart != chart) {
+            chart.setVisible(true);
+            curVisibleChart = chart;
         }
     }
 

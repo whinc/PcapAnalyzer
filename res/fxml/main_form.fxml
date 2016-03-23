@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.chart.ScatterChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
@@ -15,6 +17,7 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -80,14 +83,26 @@
                      <children>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                            <children>
-                              <Button mnemonicParsing="false" onAction="#analyzeProtocolComposition" text="%label_protocl_composition" />
+                              <Button mnemonicParsing="false" onAction="#plotPieChart" text="%label_protocl_composition" />
+                               <Button mnemonicParsing="false" onAction="#plotScatterChart" text="k-means">
+                                 <HBox.margin>
+                                    <Insets left="10.0" />
+                                 </HBox.margin></Button>
                            </children>
                         </HBox>
-                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                        <StackPane VBox.vgrow="ALWAYS">
                            <children>
-                              <PieChart fx:id="protocolPieChart" labelsVisible="true" />
+                              <PieChart fx:id="pieChart" labelsVisible="true" visible="false" />
+                              <ScatterChart fx:id="scatterChart" visible="false">
+                                <xAxis>
+                                  <NumberAxis side="BOTTOM" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis side="LEFT" />
+                                </yAxis>
+                              </ScatterChart>
                            </children>
-                        </HBox>
+                        </StackPane>
                      </children>
                   </VBox>
                </content>
