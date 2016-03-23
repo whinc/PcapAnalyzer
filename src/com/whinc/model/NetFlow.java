@@ -24,6 +24,17 @@ public class NetFlow {
     /** 目的端口 */
     int dstPort;
 
+    public boolean isClosed() {
+        return closed;
+    }
+
+    public void setClosed(boolean closed) {
+        this.closed = closed;
+    }
+
+    /** 网络流是否已结束 */
+    boolean closed = false;
+
     /* 网络流行为特征 */
     long inTotalPacketNum;
     /** 流入数据包的总字节大小 */

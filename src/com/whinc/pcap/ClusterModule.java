@@ -40,13 +40,25 @@ public class ClusterModule {
             PcapPacket packet = packetInfo.getPacket();
             Ip4 ip4 = new Ip4();
             Tcp tcp = new Tcp();
-            if (!addToNetFlow(packetInfo)
-                    && packet.hasHeader(ip4)
-                    && packet.hasHeader(tcp)) {
-                NetFlow netFlow = new NetFlow(ip4.sourceToInt(), ip4.destinationToInt(),
-                        tcp.source(), tcp.destination());
-                netFlow.add(packetInfo);
-                netFlows.add(netFlow);
+
+            if (!packet.hasHeader(ip4) || !packet.hasHeader(tcp)) continue;
+
+            NetFlow netFlow = find(packetInfo);
+            if (tcp.flags_SYN()) {      // SYN 作为TCP建立连接的标识，创建网络流
+                if (netFlow == null) {
+                    netFlow = new NetFlow(ip4.sourceToInt(), ip4.destinationToInt(),
+                            tcp.source(), tcp.destination());
+                    netFlow.add(packetInfo);
+                    netFlows.add(netFlow);
+                }
+            } else if (tcp.flags_FIN()) {
+                if (netFlow != null) {
+                    netFlow.setClosed(true);        // FIN作为TCP结束标识，关闭网络流
+                }
+            } else {                    // 加入到已存在的网络流中
+                if (netFlow != null && !netFlow.isClosed()) {
+                    netFlow.add(packetInfo);
+                }
             }
         }
     }
@@ -62,6 +74,17 @@ public class ClusterModule {
             if (netFlow.contain(packetInfo)) {
                 netFlow.add(packetInfo);
                 result = true;
+                break;
+            }
+        }
+        return result;
+    }
+
+    private NetFlow find(PacketInfo packetInfo) {
+        NetFlow result = null;
+        for (NetFlow netflow : netFlows) {
+            if (netflow.contain(packetInfo)) {
+                result = netflow;
                 break;
             }
         }
