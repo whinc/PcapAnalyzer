@@ -13,6 +13,7 @@ public class PacketInfo {
     /** 标识数据包的流向。true表示数据包发出，false表示数据包流入*/
     boolean reversed;
     private PcapPacket packet;
+    private String name;
 
     public PacketInfo(PcapPacket packet) {
         this.packet = packet;
@@ -57,7 +58,10 @@ public class PacketInfo {
     }
 
     public String getProtocolName() {
-        return PacketUtils.parseProtocolName(packet);
+        if (name == null || name.isEmpty()) {
+            name = PacketUtils.parseProtocolName(packet);
+        }
+        return name;
     }
 
     public long getLength() {

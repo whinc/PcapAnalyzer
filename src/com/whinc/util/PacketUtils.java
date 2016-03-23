@@ -16,6 +16,13 @@ import org.jnetpcap.protocol.wan.PPP;
  * Created by Administrator on 2016/3/6.
  */
 public class PacketUtils {
+    private static final String FTP = "FTP";
+    private static final String SMTP = "SMTP";
+    private static final String HTTP = "HTTP";
+    private static final int FTP_PORT1 = 21;
+    private static final int FTP_PORT2 = 20;
+    private static final int SMTP_PORT = 25;
+    private static final int HTTP_PORT = 80;
 
     private static String name(Class<? extends JHeader> head) {
         return head.getSimpleName().toUpperCase();
@@ -61,6 +68,25 @@ public class PacketUtils {
         /* 传输层协议 */
         if (packet.hasHeader(Tcp.ID)) {
             name = name(Tcp.class);
+
+            Tcp tcp = new Tcp();
+            packet.getHeader(tcp);
+            if(tcp.source() == FTP_PORT1
+                    || tcp.source() == FTP_PORT2
+                    || tcp.destination() == FTP_PORT1
+                    || tcp.destination() == FTP_PORT2) {
+                if (tcp.getPayloadLength() != 0) {
+                    name = FTP;
+                }
+            } else if (tcp.source() == SMTP_PORT || tcp.destination() == SMTP_PORT) {
+                if (tcp.getPayloadLength() != 0) {
+                    name = SMTP;
+                }
+            } else if (tcp.source() == HTTP_PORT || tcp.destination() == HTTP_PORT) {
+                if (tcp.getPayloadLength() != 0) {
+                    name = HTTP;
+                }
+            }
         }
         if (packet.hasHeader(Udp.ID)) {
             name = name(Udp.class);

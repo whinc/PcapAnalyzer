@@ -1,15 +1,18 @@
 package com.whinc.controller;
 
+import com.sun.xml.internal.bind.v2.runtime.reflect.Lister;
 import com.whinc.Config;
 import com.whinc.model.NetworkAdapter;
 import com.whinc.model.PacketInfo;
 import com.whinc.pcap.ClusterModule;
 import com.whinc.pcap.PcapManager;
 import com.whinc.ui.OptionDialog;
+import com.whinc.util.PacketUtils;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
@@ -19,8 +22,8 @@ import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.PcapPacket;
 
 import java.io.File;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
@@ -30,16 +33,29 @@ import java.util.Optional;
  */
 public class MainFormController {
     private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss S");
-    @FXML  public Label statusInfoLabel;
+    @FXML
+    public Label statusInfoLabel;
     public TextArea packetDetailText;
-    @FXML public TextArea logText;
-    @FXML public Tab logTab;
-    @FXML public TabPane tabPane;
-    @FXML public Menu menuKmeansAlgorithm;
+    @FXML
+    public TextArea logText;
+    @FXML
+    public Tab logTab;
+    @FXML
+    public TabPane tabPane;
+    @FXML
+    public Menu menuKmeansAlgorithm;
+    /**
+     * 协议组成饼状图
+     */
+    @FXML
+    public PieChart protocolPieChart;
     private Stage stage;
-    @FXML public MenuItem menuItemStop;
-    @FXML private TableView tableView;
-    @FXML private MenuItem menuItemStart;
+    @FXML
+    public MenuItem menuItemStop;
+    @FXML
+    private TableView tableView;
+    @FXML
+    private MenuItem menuItemStart;
 
     public Stage getStage() {
         return stage;
@@ -60,7 +76,8 @@ public class MainFormController {
     /**
      * 初始化 （该方法在FXMLLoader加载布局文件时自动调用）
      */
-    @FXML protected void initialize() {
+    @FXML
+    protected void initialize() {
         System.out.println("Begin initialize");
 
         ObservableList<TableColumn<PacketInfo, String>> columns = tableView.getColumns();
@@ -106,7 +123,7 @@ public class MainFormController {
         // Add radio menu item to toggle group.
         ToggleGroup toggleGroup = new ToggleGroup();
         menuKmeansAlgorithm.getItems().forEach(menuItem -> {
-            toggleGroup.getToggles().add((RadioMenuItem)menuItem);
+            toggleGroup.getToggles().add((RadioMenuItem) menuItem);
         });
 
         System.out.println("End initialize");
@@ -114,9 +131,11 @@ public class MainFormController {
 
     /**
      * Open file and load offline *.pcap data
+     *
      * @param event
      */
-    @FXML protected void openFile(ActionEvent event) {
+    @FXML
+    protected void openFile(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(Config.getString("label_open_file"));
         fileChooser.setInitialDirectory(new File("."));
@@ -159,7 +178,8 @@ public class MainFormController {
         }
     }
 
-    @FXML protected void startCapture(ActionEvent event) {
+    @FXML
+    protected void startCapture(ActionEvent event) {
         MenuItem source = (MenuItem) event.getSource();
         NetworkAdapter networkAdapter = PcapManager.getInstance().getNetworkAdapter();
         if (networkAdapter == null) {
@@ -183,7 +203,8 @@ public class MainFormController {
         });
     }
 
-    @FXML protected void stopCapture(ActionEvent event) {
+    @FXML
+    protected void stopCapture(ActionEvent event) {
         MenuItem source = (MenuItem) event.getSource();
 
         setStatusInfo(Config.getString("label_stop_capture"));
@@ -195,7 +216,8 @@ public class MainFormController {
         setStatusInfo(Config.getString("label_pcap_ready"));
     }
 
-    @FXML protected void showCaptureOptions(ActionEvent event) {
+    @FXML
+    protected void showCaptureOptions(ActionEvent event) {
 
         List<PcapIf> interfaces = PcapManager.getInstance().getDeviceList();
         OptionDialog optionDialog = new OptionDialog(interfaces);
@@ -229,17 +251,20 @@ public class MainFormController {
         statusInfoLabel.setTextFill(paint);
     }
 
-    @FXML protected void exit(ActionEvent event) {
+    @FXML
+    protected void exit(ActionEvent event) {
         if (stage != null) {
             stage.close();
         }
     }
 
-    @FXML public void clear(ActionEvent event) {
+    @FXML
+    public void clear(ActionEvent event) {
         tableView.getItems().clear();
     }
 
-    @FXML public void showAboutDialog(ActionEvent event) {
+    @FXML
+    public void showAboutDialog(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.NONE,
                 "Author: whinc\n\nE-mail: xiaohui_hubei@163.com\n",
                 ButtonType.OK);
@@ -247,16 +272,17 @@ public class MainFormController {
         alert.showAndWait();
     }
 
-    @FXML public void extractVector(ActionEvent event) {
+    @FXML
+    public void extractVector(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.NONE, "Waiting...", ButtonType.CLOSE);
         alert.initModality(Modality.APPLICATION_MODAL);
         alert.show();
 
         // 先停止捕获
-        stopCapture(new ActionEvent(menuItemStop, null));
+        stopCapture();
 
         // 提取网络流行为特征
-        ClusterModule.getInstance().extractVector(tableView.getItems());
+        ClusterModule.getInstance().extractVector(getPackets());
 
         appendLog(ClusterModule.getInstance().toString());
         tabPane.getSelectionModel().select(logTab);
@@ -264,8 +290,52 @@ public class MainFormController {
         alert.close();
     }
 
+    private List<PacketInfo> getPackets() {
+        return tableView.getItems();
+    }
+
     private void appendLog(String log) {
         String datetime = LOG_DATE_FORMAT.format(Calendar.getInstance().getTime());
         logText.appendText(datetime + "\n" + log);
+    }
+
+    /**
+     * 分析捕获的数据包中不同协议所在的比例
+     */
+    @FXML
+    public void analyzeProtocolComposition(ActionEvent event) {
+        stopCapture();
+
+        protocolPieChart.getData().clear();
+        List<PacketInfo> packets = getPackets();
+        List<PieChart.Data> dataList = new ArrayList<>();
+        double total = 0;
+        for (PacketInfo pkt : packets) {
+            boolean exsit = false;
+            for (PieChart.Data data : dataList) {
+                if (data.getName().equals(pkt.getProtocolName())) {
+                    data.setPieValue(data.getPieValue() + 1);
+                    ++total;
+                    exsit = true;
+                    break;
+                }
+            }
+            if (!exsit) {
+                dataList.add(new PieChart.Data(pkt.getProtocolName(), 1));
+                ++total;
+            }
+        }
+        protocolPieChart.getData().addAll(dataList);
+
+        // 输出到日志面板
+        StringBuilder log = new StringBuilder("Protocol Composition:\n");
+        for (PieChart.Data data : dataList) {
+            log.append(String.format("%s : %.1f%%\n", data.getName(), data.getPieValue() / total * 100));
+        }
+        appendLog(log.toString());
+    }
+
+    private void stopCapture() {
+        stopCapture(new ActionEvent(menuItemStop, null));
     }
 }
