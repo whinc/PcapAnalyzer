@@ -327,12 +327,19 @@ public class MainFormController {
         }
         protocolPieChart.getData().addAll(dataList);
 
-        // 输出到日志面板
-        StringBuilder log = new StringBuilder("Protocol Composition:\n");
-        for (PieChart.Data data : dataList) {
-            log.append(String.format("%s : %.1f%%\n", data.getName(), data.getPieValue() / total * 100));
+        if (!dataList.isEmpty()) {
+            // 输出到日志面板
+            StringBuilder log = new StringBuilder("Protocol Composition:\n");
+            for (PieChart.Data data : dataList) {
+                log.append(String.format("%s : %.1f%%\n", data.getName(), data.getPieValue() / total * 100));
+            }
+            appendLog(log.toString());
+        } else {
+            appendLog("There is no data.");
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
+            alert.setHeaderText("There is no data!");
+            alert.showAndWait();
         }
-        appendLog(log.toString());
     }
 
     private void stopCapture() {
