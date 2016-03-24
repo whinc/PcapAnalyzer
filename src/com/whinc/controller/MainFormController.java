@@ -391,7 +391,12 @@ public class MainFormController {
      * @param chart
      */
     private void showChart(Chart chart) {
+        if (chart == null) return;
+
         if (curVisibleChart == null || curVisibleChart != chart) {
+            if (curVisibleChart != null) {
+                curVisibleChart.setVisible(false);
+            }
             chart.setVisible(true);
             curVisibleChart = chart;
         }
