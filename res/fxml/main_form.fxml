@@ -88,6 +88,16 @@
                                  <HBox.margin>
                                     <Insets left="10.0" />
                                  </HBox.margin></Button>
+                              <Button mnemonicParsing="false" text="k-means++" onAction="#plotScatterChart">
+                                 <HBox.margin>
+                                    <Insets left="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" text="fuzzy k-means" onAction="#plotScatterChart">
+                                 <HBox.margin>
+                                    <Insets left="10.0" />
+                                 </HBox.margin>
+                              </Button>
                            </children>
                         </HBox>
                         <StackPane VBox.vgrow="ALWAYS">
