@@ -380,8 +380,7 @@ public class MainFormController {
             series.setName("Cluster" + (i+1));
             List<Eigenvector> sampleList = centerList.get(i);
             for (Eigenvector v : sampleList) {
-                double[] vector = v.getVector();
-                series.getData().add(new XYChart.Data<>(vector[0], vector[1]));
+                series.getData().add(new XYChart.Data<>(v.get(0), v.get(1)));
             }
             scatterChart.getData().add(series);
         }

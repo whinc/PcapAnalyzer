@@ -4,10 +4,6 @@ package com.whinc.algorithm;
  * 特征向量
  */
 public class Eigenvector {
-    public double[] getVector() {
-        return vector;
-    }
-
     private double[] vector;
 
     public int getSize() {
@@ -51,14 +47,14 @@ public class Eigenvector {
 
     public Eigenvector add(Eigenvector other) {
         for (int i = 0; i < vector.length; ++i) {
-            vector[i] += other.getVector()[i];
+            vector[i] += other.get(i);
         }
         return this;
     }
 
     public Eigenvector sub(Eigenvector other) {
         for (int i = 0; i < vector.length; ++i) {
-            vector[i] -= other.getVector()[i];
+            vector[i] -= other.get(i);
         }
         return this;
     }
