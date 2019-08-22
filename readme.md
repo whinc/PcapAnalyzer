@@ -1,7 +1,5 @@
 ## PcapAnalyzer
 
-...
-
 
 ## 安装运行
 
@@ -23,6 +21,13 @@
 ```
 java -cp .;<path to jnetpcap.jar> -Djava.library.path=<path to share library> com/whinc/Main
 ```
+
+## 文档
+
+当时设计时绘制的一些图，全部图都在`docs`目录下，需要自取。
+
+![](./docs/系统总体结构图.svg)
+
 
 ## 存在的问题
 
